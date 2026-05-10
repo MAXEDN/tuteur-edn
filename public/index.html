@@ -358,23 +358,20 @@
   <div class="quick-actions">
     <button class="quick-btn exam-btn" onclick="openExamModal()">&#x23F1; Mode Examen</button>
     <button class="quick-btn" onclick="launchSRSReview()" id="srsQuickBtn" style="border-color:var(--warning);color:var(--warning)">&#x1F504; Réviser (<span id="srsDueCount">0</span>)</button>
-    <button class="quick-btn" onclick="sendQuick('QCM sur la cardiologie, niveau moyen')">&#x1F4DD; QCM Cardio</button>
-    <button class="quick-btn" onclick="sendQuick('Dossier progressif en pneumologie')">&#x1F4CB; Dossier Pneumo</button>
-    <button class="quick-btn" onclick="sendQuick('Fiche item 245 — Diabète')">&#x1F4C4; Fiche Diabète</button>
-    <button class="quick-btn" onclick="sendQuick('Cas clinique en neurologie')">&#x1F9E0; Cas Neuro</button>
-    <button class="quick-btn" onclick="sendQuick('Aide-moi à organiser mes révisions pour les EDN')">&#x1F4C5; Plan Révision</button>
-    <button class="quick-btn" onclick="sendQuick('Interroge-moi sur mes fiches chargées')">&#x1F4DA; QCM mes fiches</button>
+    <button class="quick-btn" onclick="sendQuick('Interroge-moi sur mes fiches LiSA avec des QCM')">&#x1F4DA; QCM sur mes fiches</button>
+    <button class="quick-btn" onclick="sendQuick('Fais-moi un dossier progressif basé sur mes fiches LiSA')">&#x1F4CB; Dossier progressif</button>
+    <button class="quick-btn" onclick="sendQuick('Quelles sont mes fiches les moins bien maîtrisées ? Propose-moi des QCM ciblés')">&#x1F3AF; Points faibles</button>
   </div>
 
   <div class="chat-container" id="chatContainer">
     <div class="welcome" id="welcome">
-      <h2>Bienvenue sur Tuteur EDN</h2>
-      <p>Ton assistant pour préparer les EDN. Charge tes fiches, personnalise tes instructions, et révise.</p>
+      <h2>Tuteur EDN — Max</h2>
+      <p>Importe tes fiches LiSA depuis Google Drive, puis entraîne-toi avec des QCM et dossiers progressifs basés sur tes cours.</p>
       <div class="suggestions">
-        <button class="suggestion-btn exam-suggest" onclick="openExamModal()"><span class="label">&#x23F1; Mode Examen</span>Chrono, conditions réelles, score final — comme le jour J</button>
-        <button class="suggestion-btn" onclick="sendQuick('Je suis en D3. Fais-moi un dossier progressif sur l\'insuffisance cardiaque.')"><span class="label">Dossier progressif</span>Insuffisance cardiaque — 10-15 questions</button>
-        <button class="suggestion-btn" onclick="sendQuick('Fiche item 157 — Infections urinaires')"><span class="label">Fiche de révision</span>Item 157 — Infections urinaires</button>
-        <button class="suggestion-btn" onclick="togglePanel()"><span class="label">&#x2699; Charger mes fiches Lisa</span>Ajoute tes fiches PDF pour des QCM personnalisés</button>
+        <button class="suggestion-btn" onclick="togglePanel()"><span class="label">&#x1F4C2; Importer mes fiches LiSA</span>Depuis Google Drive ou en glissant tes fichiers</button>
+        <button class="suggestion-btn" onclick="sendQuick('Interroge-moi sur mes fiches LiSA avec des QCM')"><span class="label">&#x1F4DA; QCM sur mes fiches</span>Questions basées sur tes cours importés</button>
+        <button class="suggestion-btn" onclick="sendQuick('Fais-moi un dossier progressif basé sur mes fiches LiSA')"><span class="label">&#x1F4CB; Dossier progressif</span>7 questions enchaînées autour d'un patient</button>
+        <button class="suggestion-btn exam-suggest" onclick="openExamModal()"><span class="label">&#x23F1; Mode Examen</span>Conditions réelles avec chrono et score</button>
       </div>
     </div>
   </div>
@@ -390,7 +387,7 @@
     <div class="input-wrapper">
       <button class="attach-btn" onclick="document.getElementById('quickFileInput').click()" title="Joindre une fiche">&#x1F4CE;</button>
       <input type="file" id="quickFileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.txt,.md" style="display:none" onchange="handleFiles(this.files)">
-      <textarea id="messageInput" placeholder="QCM sur..., Fiche item..., Cas clinique en..., ou ta question" rows="1" onkeydown="handleKeydown(event)" oninput="autoResize(this)"></textarea>
+      <textarea id="messageInput" placeholder="Pose ta question, demande un QCM ou un dossier sur tes fiches LiSA..." rows="1" onkeydown="handleKeydown(event)" oninput="autoResize(this)"></textarea>
       <button class="send-btn" id="sendBtn" onclick="sendMessage()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
       </button>
@@ -1134,55 +1131,133 @@
     }
 
     function createPicker() {
+      // Vue fichiers avec navigation dans les dossiers
+      const docsView = new google.picker.DocsView()
+        .setIncludeFolders(true)
+        .setSelectFolderEnabled(true)
+        .setMimeTypes('application/pdf,image/png,image/jpeg,text/plain,text/markdown,application/vnd.google-apps.folder');
+
       const picker = new google.picker.PickerBuilder()
         .setAppId(gdriveConfig.googleAppId)
         .setOAuthToken(accessToken)
         .setDeveloperKey(gdriveConfig.googleApiKey)
-        .addView(new google.picker.DocsView()
-          .setIncludeFolders(true)
-          .setMimeTypes('application/pdf,image/png,image/jpeg,text/plain,text/markdown'))
-        .addView(new google.picker.DocsView()
-          .setIncludeFolders(true)
-          .setSelectFolderEnabled(false)
-          .setLabel('Tous les fichiers'))
-        .setTitle('Sélectionne tes fiches LiSA')
+        .addView(docsView)
+        .setTitle('Sélectionne un dossier ou des fichiers LiSA')
         .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
         .setCallback(pickerCallback)
         .build();
       picker.setVisible(true);
     }
 
+    // Lister tous les fichiers d'un dossier Drive (récursif)
+    async function listDriveFolder(folderId) {
+      let allFiles = [];
+      let pageToken = '';
+      const supportedTypes = [
+        'application/pdf','image/png','image/jpeg','image/jpg',
+        'text/plain','text/markdown',
+        'application/vnd.google-apps.document' // Google Docs → export PDF
+      ];
+
+      do {
+        const q = `'${folderId}' in parents and trashed=false`;
+        let url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=nextPageToken,files(id,name,mimeType,size)&pageSize=100`;
+        if (pageToken) url += `&pageToken=${pageToken}`;
+
+        const res = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        if (!res.ok) break;
+        const data = await res.json();
+
+        for (const f of (data.files || [])) {
+          if (f.mimeType === 'application/vnd.google-apps.folder') {
+            // Sous-dossier → récursion
+            const subFiles = await listDriveFolder(f.id);
+            allFiles = allFiles.concat(subFiles);
+          } else if (supportedTypes.includes(f.mimeType)) {
+            allFiles.push(f);
+          }
+        }
+        pageToken = data.nextPageToken || '';
+      } while (pageToken);
+
+      return allFiles;
+    }
+
     async function pickerCallback(data) {
       if (data.action !== google.picker.Action.PICKED) return;
 
-      const docs = data.docs || [];
-      setGdriveStatus(`Import de ${docs.length} fichier${docs.length>1?'s':''}...`, false);
+      let docs = data.docs || [];
       document.getElementById('gdriveBtn').disabled = true;
 
-      let imported = 0;
+      // Si un dossier est sélectionné, lister son contenu
+      let filesToImport = [];
       for (const doc of docs) {
+        if (doc.mimeType === 'application/vnd.google-apps.folder') {
+          setGdriveStatus(`Scan du dossier "${doc.name}"...`, false);
+          const folderFiles = await listDriveFolder(doc.id);
+          filesToImport = filesToImport.concat(folderFiles);
+        } else {
+          filesToImport.push(doc);
+        }
+      }
+
+      if (filesToImport.length === 0) {
+        setGdriveStatus('Aucun fichier compatible trouvé dans ce dossier', true);
+        document.getElementById('gdriveBtn').disabled = false;
+        setTimeout(() => setGdriveStatus('', false), 5000);
+        return;
+      }
+
+      // Dédupliquer et filtrer par taille (max 5 Mo par fichier)
+      const MAX_FILE_SIZE = 5 * 1024 * 1024;
+      const existingNames = new Set(uploadedFiles.map(f => f.name));
+      const newFiles = [];
+      let skippedDup = 0, skippedSize = 0;
+      for (const f of filesToImport) {
+        if (existingNames.has(f.name)) { skippedDup++; continue; }
+        if (f.size && f.size > MAX_FILE_SIZE) { skippedSize++; continue; }
+        newFiles.push(f);
+      }
+
+      let statusExtra = '';
+      if (skippedDup > 0) statusExtra += ` (${skippedDup} déjà présent${skippedDup>1?'s':''})`;
+      if (skippedSize > 0) statusExtra += ` (${skippedSize} trop volumineux)`;
+      setGdriveStatus(`Import de ${newFiles.length} fichier${newFiles.length>1?'s':''}...${statusExtra}`, false);
+
+      let imported = 0, errors = 0;
+      for (let i = 0; i < newFiles.length; i++) {
         try {
-          const file = await downloadDriveFile(doc);
+          setGdriveStatus(`Import ${i+1}/${newFiles.length} : ${newFiles[i].name}`, false);
+          const file = await downloadDriveFile(newFiles[i]);
           if (file) {
             uploadedFiles.push(file);
             await saveFileToDB(file);
             imported++;
+            // Rafraîchir la liste tous les 20 fichiers
+            if (imported % 20 === 0) { renderFileList(); updateBadge(); }
           }
         } catch (e) {
-          console.error('Erreur import Drive:', doc.name, e);
+          errors++;
+          console.error('Erreur import Drive:', newFiles[i].name, e);
         }
+        // Pause toutes les 50 fichiers pour ne pas saturer le navigateur
+        if (i > 0 && i % 50 === 0) await new Promise(r => setTimeout(r, 500));
       }
 
       renderFileList();
       updateBadge();
       document.getElementById('gdriveBtn').disabled = false;
       if (imported > 0) {
-        setGdriveStatus(`${imported} fichier${imported>1?'s':''} importé${imported>1?'s':''} depuis Drive`, false);
-        filesSentInSession = false; // re-send files with next message
+        let msg = `${imported} fichier${imported>1?'s':''} importé${imported>1?'s':''}`;
+        if (errors > 0) msg += ` (${errors} erreur${errors>1?'s':''})`;
+        setGdriveStatus(msg, false);
+        filesSentInSession = false;
       } else {
-        setGdriveStatus('Aucun fichier importé', true);
+        setGdriveStatus('Aucun nouveau fichier importé', true);
       }
-      setTimeout(() => setGdriveStatus('', false), 5000);
+      setTimeout(() => setGdriveStatus('', false), 8000);
     }
 
     async function downloadDriveFile(doc) {
