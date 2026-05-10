@@ -26,10 +26,12 @@ Chaque correction suit : Données → Hypothèses → Arguments pour/contre → 
 - QCM : propositions A-E numérotées
 - Corrections : gras pour les points essentiels
 - Propose toujours de continuer
-- Utilise le markdown pour la mise en forme`;
+- Utilise le markdown pour la mise en forme
+
+## Fiches de l'étudiant
+Quand des fiches de révision sont fournies en contexte, utilise-les comme base de connaissances prioritaire. Pose des questions basées sur leur contenu exact, vérifie que l'étudiant maîtrise les points qui y figurent, et signale si une information dans les fiches semble incomplète ou mérite d'être complétée.`;
 
 export default async function handler(req, res) {
-  // CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -43,19 +45,82 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { messages, level } = req.body;
+    const { messages, level, customInstructions, files } = req.body;
 
     const client = new Anthropic();
 
-    const systemWithLevel = level
-      ? `${SYSTEM_PROMPT}\n\nL'étudiant est en ${level}. Adapte la difficulté en conséquence.`
-      : SYSTEM_PROMPT;
+    // Build system prompt with level + custom instructions + files
+    let system = SYSTEM_PROMPT;
+
+    if (level) {
+      system += `\n\nL'étudiant est en ${level}. Adapte la difficulté en conséquence.`;
+    }
+
+    if (customInstructions && customInstructions.trim()) {
+      system += `\n\n## Instructions personnalisées de l'étudiant\n${customInstructions}`;
+    }
+
+    if (files && files.length > 0) {
+      system += `\n\n## Fiches de révision chargées\nL'étudiant a chargé ${files.length} fiche(s). Leur contenu est inclus dans les messages. Utilise-les comme référence pour tes questions et corrections.`;
+    }
+
+    // Process messages to inject file content as multimodal blocks
+    const processedMessages = messages.map((msg) => {
+      if (msg.files && msg.files.length > 0) {
+        const content = [];
+
+        // Add file content blocks
+        for (const file of msg.files) {
+          if (file.type === "image") {
+            content.push({
+              type: "image",
+              source: {
+                type: "base64",
+                media_type: file.mediaType,
+                data: file.data,
+              },
+            });
+            content.push({
+              type: "text",
+              text: `[Fiche jointe : ${file.name}]`,
+            });
+          } else if (file.type === "pdf") {
+            content.push({
+              type: "document",
+              source: {
+                type: "base64",
+                media_type: "application/pdf",
+                data: file.data,
+              },
+            });
+            content.push({
+              type: "text",
+              text: `[Document PDF joint : ${file.name}]`,
+            });
+          } else {
+            content.push({
+              type: "text",
+              text: `[Contenu de la fiche "${file.name}" :]\n${file.data}`,
+            });
+          }
+        }
+
+        // Add the text message
+        if (msg.content) {
+          content.push({ type: "text", text: msg.content });
+        }
+
+        return { role: msg.role, content };
+      }
+
+      return msg;
+    });
 
     const response = await client.messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 4096,
-      system: systemWithLevel,
-      messages: messages,
+      system,
+      messages: processedMessages,
     });
 
     const text = response.content

@@ -22,12 +22,10 @@
       --accent: #059669;
       --accent-light: #d1fae5;
       --warning: #f59e0b;
+      --warning-light: #fef3c7;
       --danger: #ef4444;
-      --chat-user: #eff6ff;
-      --chat-ai: #ffffff;
       --radius: 12px;
       --shadow: 0 1px 3px rgba(0,0,0,0.08);
-      --shadow-lg: 0 4px 20px rgba(0,0,0,0.1);
     }
 
     body {
@@ -39,7 +37,6 @@
       flex-direction: column;
     }
 
-    /* Header */
     .header {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
@@ -59,7 +56,7 @@
     }
     .header h1 { font-size: 18px; font-weight: 700; }
     .header .subtitle { font-size: 12px; color: var(--text-muted); }
-
+    .header-right { display: flex; align-items: center; gap: 8px; }
     .level-select {
       padding: 6px 12px;
       border: 1px solid var(--border);
@@ -69,277 +66,194 @@
       color: var(--text);
       cursor: pointer;
     }
-
-    /* Quick actions */
-    .quick-actions {
-      padding: 12px 20px;
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      flex-shrink: 0;
+    .icon-btn {
+      width: 36px; height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
       background: var(--surface);
-      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .icon-btn:hover, .icon-btn.active { background: var(--primary-light); border-color: var(--primary); }
+    .icon-btn .badge {
+      position: absolute; top: -4px; right: -4px;
+      width: 16px; height: 16px;
+      background: var(--primary); color: white; border-radius: 50%;
+      font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: 600;
+    }
+
+    .side-panel {
+      display: none; position: fixed; top: 0; right: 0;
+      width: 380px; max-width: 90vw; height: 100dvh;
+      background: var(--surface); border-left: 1px solid var(--border);
+      z-index: 100; flex-direction: column;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+    }
+    .side-panel.open { display: flex; }
+    .panel-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); z-index: 99; }
+    .panel-overlay.open { display: block; }
+    .panel-header {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .panel-header h2 { font-size: 16px; font-weight: 600; }
+    .panel-close {
+      width: 28px; height: 28px; border: none; background: none;
+      cursor: pointer; font-size: 20px; color: var(--text-muted);
+      display: flex; align-items: center; justify-content: center; border-radius: 6px;
+    }
+    .panel-close:hover { background: var(--bg); }
+    .panel-body { flex: 1; overflow-y: auto; padding: 20px; }
+    .panel-section { margin-bottom: 24px; }
+    .panel-section h3 {
+      font-size: 13px; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;
+    }
+
+    .upload-zone {
+      border: 2px dashed var(--border); border-radius: var(--radius);
+      padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s;
+    }
+    .upload-zone:hover, .upload-zone.dragover { border-color: var(--primary); background: var(--primary-light); }
+    .upload-zone .uz-icon { font-size: 28px; margin-bottom: 6px; }
+    .upload-zone p { font-size: 13px; color: var(--text-muted); }
+    .upload-zone .formats { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    .file-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+    .file-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px; background: var(--bg); border-radius: 8px; font-size: 13px;
+    }
+    .file-item .file-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-item .file-size { color: var(--text-muted); font-size: 11px; }
+    .file-status { font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: 500; }
+    .file-status.ready { background: var(--accent-light); color: var(--accent); }
+    .file-status.loading { background: var(--warning-light); color: var(--warning); }
+    .file-remove {
+      width: 20px; height: 20px; border: none; background: none;
+      cursor: pointer; color: var(--danger); font-size: 16px;
+      display: flex; align-items: center; justify-content: center; border-radius: 4px;
+    }
+    .file-remove:hover { background: #fee2e2; }
+
+    .instructions-textarea {
+      width: 100%; min-height: 100px; padding: 12px;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      font-size: 13px; font-family: inherit; resize: vertical; outline: none; line-height: 1.5;
+    }
+    .instructions-textarea:focus { border-color: var(--primary); }
+    .instructions-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; line-height: 1.4; }
+    .save-btn {
+      margin-top: 10px; padding: 8px 16px; background: var(--primary); color: white;
+      border: none; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 500;
+    }
+    .save-btn:hover { background: var(--primary-dark); }
+    .save-feedback { display: inline-block; margin-left: 8px; font-size: 12px; color: var(--accent); opacity: 0; transition: opacity 0.3s; }
+
+    .quick-actions {
+      padding: 12px 20px; display: flex; gap: 8px; overflow-x: auto; flex-shrink: 0;
+      background: var(--surface); border-bottom: 1px solid var(--border);
       -webkit-overflow-scrolling: touch;
     }
     .quick-actions::-webkit-scrollbar { display: none; }
     .quick-btn {
-      flex-shrink: 0;
-      padding: 8px 16px;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      background: var(--surface);
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-      color: var(--text);
+      flex-shrink: 0; padding: 8px 16px; border: 1px solid var(--border);
+      border-radius: 20px; background: var(--surface); font-size: 13px;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap; color: var(--text);
     }
-    .quick-btn:hover {
-      background: var(--primary-light);
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-    .quick-btn .icon { margin-right: 6px; }
+    .quick-btn:hover { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
 
-    /* Chat area */
+    .attached-files { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+    .file-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; background: rgba(255,255,255,0.2); border-radius: 12px; font-size: 11px;
+    }
+
     .chat-container {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+      flex: 1; overflow-y: auto; padding: 20px;
+      display: flex; flex-direction: column; gap: 16px;
     }
-
-    .welcome {
-      text-align: center;
-      padding: 40px 20px;
-      max-width: 500px;
-      margin: auto;
-    }
-    .welcome h2 {
-      font-size: 24px;
-      margin-bottom: 8px;
-    }
-    .welcome p {
-      color: var(--text-muted);
-      line-height: 1.6;
-    }
-    .welcome .suggestions {
-      margin-top: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+    .welcome { text-align: center; padding: 40px 20px; max-width: 500px; margin: auto; }
+    .welcome h2 { font-size: 24px; margin-bottom: 8px; }
+    .welcome p { color: var(--text-muted); line-height: 1.6; }
+    .welcome .suggestions { margin-top: 24px; display: flex; flex-direction: column; gap: 8px; }
     .suggestion-btn {
-      padding: 12px 16px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      text-align: left;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-size: 14px;
-      line-height: 1.4;
-      color: var(--text);
+      padding: 12px 16px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); text-align: left; cursor: pointer; transition: all 0.2s;
+      font-size: 14px; line-height: 1.4; color: var(--text);
     }
-    .suggestion-btn:hover {
-      border-color: var(--primary);
-      box-shadow: var(--shadow);
-    }
-    .suggestion-btn .label {
-      font-weight: 600;
-      color: var(--primary);
-      display: block;
-      margin-bottom: 2px;
-      font-size: 13px;
-    }
+    .suggestion-btn:hover { border-color: var(--primary); box-shadow: var(--shadow); }
+    .suggestion-btn .label { font-weight: 600; color: var(--primary); display: block; margin-bottom: 2px; font-size: 13px; }
 
-    /* Messages */
-    .message {
-      max-width: 800px;
-      width: 100%;
-      margin: 0 auto;
-      display: flex;
-      gap: 12px;
-    }
+    .message { max-width: 800px; width: 100%; margin: 0 auto; display: flex; gap: 12px; }
     .message.user { justify-content: flex-end; }
     .message.assistant { justify-content: flex-start; }
-
     .message-avatar {
-      width: 32px; height: 32px;
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px;
-      flex-shrink: 0;
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;
     }
-    .message.assistant .message-avatar {
-      background: var(--primary);
-      color: white;
-    }
-    .message.user .message-avatar {
-      background: var(--accent);
-      color: white;
-      order: 2;
-    }
-
+    .message.assistant .message-avatar { background: var(--primary); color: white; }
+    .message.user .message-avatar { background: var(--accent); color: white; order: 2; }
     .message-content {
-      padding: 12px 16px;
-      border-radius: var(--radius);
-      line-height: 1.6;
-      font-size: 14px;
-      max-width: 85%;
-      overflow-wrap: break-word;
+      padding: 12px 16px; border-radius: var(--radius); line-height: 1.6;
+      font-size: 14px; max-width: 85%; overflow-wrap: break-word;
     }
-    .message.user .message-content {
-      background: var(--primary);
-      color: white;
-      border-bottom-right-radius: 4px;
-    }
-    .message.assistant .message-content {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-bottom-left-radius: 4px;
-      box-shadow: var(--shadow);
-    }
+    .message.user .message-content { background: var(--primary); color: white; border-bottom-right-radius: 4px; }
+    .message.assistant .message-content { background: var(--surface); border: 1px solid var(--border); border-bottom-left-radius: 4px; box-shadow: var(--shadow); }
 
-    /* Markdown in assistant messages */
-    .message.assistant .message-content h1,
-    .message.assistant .message-content h2,
-    .message.assistant .message-content h3 {
-      margin-top: 16px;
-      margin-bottom: 8px;
-    }
+    .message.assistant .message-content h1, .message.assistant .message-content h2, .message.assistant .message-content h3 { margin-top: 16px; margin-bottom: 8px; }
     .message.assistant .message-content h1 { font-size: 18px; }
     .message.assistant .message-content h2 { font-size: 16px; }
     .message.assistant .message-content h3 { font-size: 14px; }
     .message.assistant .message-content p { margin-bottom: 8px; }
-    .message.assistant .message-content ul,
-    .message.assistant .message-content ol {
-      margin: 8px 0;
-      padding-left: 20px;
-    }
+    .message.assistant .message-content ul, .message.assistant .message-content ol { margin: 8px 0; padding-left: 20px; }
     .message.assistant .message-content li { margin-bottom: 4px; }
-    .message.assistant .message-content strong {
-      color: var(--primary-dark);
-      font-weight: 600;
-    }
-    .message.assistant .message-content code {
-      background: #f1f5f9;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 13px;
-    }
-    .message.assistant .message-content pre {
-      background: #1e293b;
-      color: #e2e8f0;
-      padding: 12px;
-      border-radius: 8px;
-      overflow-x: auto;
-      margin: 8px 0;
-    }
-    .message.assistant .message-content pre code {
-      background: transparent;
-      color: inherit;
-    }
-    .message.assistant .message-content table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 8px 0;
-      font-size: 13px;
-    }
-    .message.assistant .message-content th,
-    .message.assistant .message-content td {
-      padding: 6px 10px;
-      border: 1px solid var(--border);
-      text-align: left;
-    }
-    .message.assistant .message-content th {
-      background: #f1f5f9;
-      font-weight: 600;
-    }
+    .message.assistant .message-content strong { color: var(--primary-dark); font-weight: 600; }
+    .message.assistant .message-content code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+    .message.assistant .message-content pre { background: #1e293b; color: #e2e8f0; padding: 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0; }
+    .message.assistant .message-content pre code { background: transparent; color: inherit; }
+    .message.assistant .message-content table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 13px; }
+    .message.assistant .message-content th, .message.assistant .message-content td { padding: 6px 10px; border: 1px solid var(--border); text-align: left; }
+    .message.assistant .message-content th { background: #f1f5f9; font-weight: 600; }
 
-    /* Typing indicator */
-    .typing {
-      display: flex;
-      gap: 4px;
-      padding: 8px 0;
-    }
-    .typing span {
-      width: 8px; height: 8px;
-      background: var(--text-muted);
-      border-radius: 50%;
-      animation: bounce 1.4s infinite ease-in-out;
-    }
+    .typing { display: flex; gap: 4px; padding: 8px 0; }
+    .typing span { width: 8px; height: 8px; background: var(--text-muted); border-radius: 50%; animation: bounce 1.4s infinite ease-in-out; }
     .typing span:nth-child(2) { animation-delay: 0.2s; }
     .typing span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes bounce {
-      0%, 80%, 100% { transform: scale(0); }
-      40% { transform: scale(1); }
-    }
+    @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
 
-    /* Input area */
-    .input-area {
-      padding: 12px 20px 20px;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      flex-shrink: 0;
+    .input-area { padding: 12px 20px 20px; background: var(--surface); border-top: 1px solid var(--border); flex-shrink: 0; }
+    .input-wrapper { max-width: 800px; margin: 0 auto; display: flex; gap: 8px; align-items: flex-end; }
+    .attach-btn {
+      width: 44px; height: 44px; border: 1px solid var(--border); background: var(--surface);
+      border-radius: var(--radius); cursor: pointer; display: flex; align-items: center;
+      justify-content: center; font-size: 20px; transition: all 0.2s; flex-shrink: 0;
     }
-    .input-wrapper {
-      max-width: 800px;
-      margin: 0 auto;
-      display: flex;
-      gap: 8px;
-      align-items: flex-end;
-    }
+    .attach-btn:hover { background: var(--primary-light); border-color: var(--primary); }
     .input-wrapper textarea {
-      flex: 1;
-      padding: 12px 16px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      font-size: 14px;
-      font-family: inherit;
-      resize: none;
-      outline: none;
-      max-height: 150px;
-      min-height: 44px;
-      line-height: 1.5;
-      transition: border-color 0.2s;
+      flex: 1; padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius);
+      font-size: 14px; font-family: inherit; resize: none; outline: none;
+      max-height: 150px; min-height: 44px; line-height: 1.5;
     }
-    .input-wrapper textarea:focus {
-      border-color: var(--primary);
-    }
+    .input-wrapper textarea:focus { border-color: var(--primary); }
     .send-btn {
-      width: 44px; height: 44px;
-      border: none;
-      background: var(--primary);
-      color: white;
-      border-radius: var(--radius);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s;
-      flex-shrink: 0;
+      width: 44px; height: 44px; border: none; background: var(--primary); color: white;
+      border-radius: var(--radius); cursor: pointer; display: flex; align-items: center;
+      justify-content: center; transition: background 0.2s; flex-shrink: 0;
     }
     .send-btn:hover { background: var(--primary-dark); }
     .send-btn:disabled { background: var(--border); cursor: not-allowed; }
     .send-btn svg { width: 20px; height: 20px; }
 
-    /* Stats bar */
     .stats-bar {
-      padding: 6px 20px;
-      background: var(--accent-light);
-      display: flex;
-      justify-content: center;
-      gap: 24px;
-      font-size: 12px;
-      color: var(--accent);
-      font-weight: 500;
-      flex-shrink: 0;
+      padding: 6px 20px; background: var(--accent-light);
+      display: flex; justify-content: center; gap: 24px;
+      font-size: 12px; color: var(--accent); font-weight: 500; flex-shrink: 0;
     }
 
-    /* Mobile */
     @media (max-width: 640px) {
       .header h1 { font-size: 15px; }
       .quick-actions { padding: 8px 12px; gap: 6px; }
@@ -347,6 +261,7 @@
       .chat-container { padding: 12px; gap: 12px; }
       .message-content { max-width: 90%; }
       .input-area { padding: 8px 12px 16px; }
+      .side-panel { width: 100%; max-width: 100%; }
     }
   </style>
 </head>
@@ -360,28 +275,62 @@
         <div class="subtitle">Ton coach pour les EDN</div>
       </div>
     </div>
-    <select class="level-select" id="levelSelect">
-      <option value="">Niveau...</option>
-      <option value="D2">D2 (DFASM1)</option>
-      <option value="D3">D3 (DFASM2)</option>
-      <option value="D4">D4 (DFASM3)</option>
-    </select>
+    <div class="header-right">
+      <select class="level-select" id="levelSelect">
+        <option value="">Niveau...</option>
+        <option value="D2">D2 (DFASM1)</option>
+        <option value="D3">D3 (DFASM2)</option>
+        <option value="D4">D4 (DFASM3)</option>
+      </select>
+      <button class="icon-btn" onclick="togglePanel()" id="panelBtn" title="Fiches et paramètres">
+        &#x2699;
+        <span class="badge" id="filesBadge" style="display:none">0</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="panel-overlay" id="panelOverlay" onclick="togglePanel()"></div>
+  <div class="side-panel" id="sidePanel">
+    <div class="panel-header">
+      <h2>Mes fiches et paramètres</h2>
+      <button class="panel-close" onclick="togglePanel()">&#x2715;</button>
+    </div>
+    <div class="panel-body">
+      <div class="panel-section">
+        <h3>Fiches de révision</h3>
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+          <div class="uz-icon">&#x1F4C2;</div>
+          <p>Clique ou glisse tes fiches ici</p>
+          <div class="formats">PDF, images (JPG, PNG), texte — max 10 Mo/fichier</div>
+        </div>
+        <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.txt,.md" style="display:none" onchange="handleFiles(this.files)">
+        <div class="file-list" id="fileList"></div>
+      </div>
+      <div class="panel-section">
+        <h3>Instructions personnalisées</h3>
+        <textarea class="instructions-textarea" id="customInstructions" placeholder="Ex: Je suis en D4, je prépare les EDN dans 3 mois.&#10;Mes points faibles : neurologie, pédiatrie.&#10;Insiste sur la sémiologie.&#10;Fais toujours 10 QCM par série."></textarea>
+        <div class="instructions-hint">Ces instructions sont envoyées à chaque message pour personnaliser le tuteur.</div>
+        <div style="display: flex; align-items: center; margin-top: 10px;">
+          <button class="save-btn" onclick="saveInstructions()">Sauvegarder</button>
+          <span class="save-feedback" id="saveFeedback">Sauvegardé !</span>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="quick-actions">
-    <button class="quick-btn" onclick="sendQuick('QCM sur la cardiologie, niveau moyen')"><span class="icon">&#x1F4DD;</span>QCM Cardio</button>
-    <button class="quick-btn" onclick="sendQuick('Dossier progressif en pneumologie')"><span class="icon">&#x1F4CB;</span>Dossier Pneumo</button>
-    <button class="quick-btn" onclick="sendQuick('Fiche item 245 — Diabète')"><span class="icon">&#x1F4C4;</span>Fiche Diabète</button>
-    <button class="quick-btn" onclick="sendQuick('Cas clinique en neurologie')"><span class="icon">&#x1F9E0;</span>Cas Neuro</button>
-    <button class="quick-btn" onclick="sendQuick('Aide-moi à organiser mes révisions pour les EDN')"><span class="icon">&#x1F4C5;</span>Plan Révision</button>
-    <button class="quick-btn" onclick="sendQuick('QCM sur les urgences, niveau difficile')"><span class="icon">&#x1F6A8;</span>QCM Urgences</button>
-    <button class="quick-btn" onclick="sendQuick('Fiche item 330 — Traumatisme crânien')"><span class="icon">&#x1F4C4;</span>Fiche TC</button>
+    <button class="quick-btn" onclick="sendQuick('QCM sur la cardiologie, niveau moyen')">&#x1F4DD; QCM Cardio</button>
+    <button class="quick-btn" onclick="sendQuick('Dossier progressif en pneumologie')">&#x1F4CB; Dossier Pneumo</button>
+    <button class="quick-btn" onclick="sendQuick('Fiche item 245 — Diabète')">&#x1F4C4; Fiche Diabète</button>
+    <button class="quick-btn" onclick="sendQuick('Cas clinique en neurologie')">&#x1F9E0; Cas Neuro</button>
+    <button class="quick-btn" onclick="sendQuick('Aide-moi à organiser mes révisions pour les EDN')">&#x1F4C5; Plan Révision</button>
+    <button class="quick-btn" onclick="sendQuick('Interroge-moi sur mes fiches chargées')">&#x1F4DA; QCM mes fiches</button>
   </div>
 
   <div class="chat-container" id="chatContainer">
     <div class="welcome" id="welcome">
       <h2>Bienvenue sur Tuteur EDN</h2>
-      <p>Ton assistant personnel pour préparer les EDN. Choisis un mode de travail ou pose ta question directement.</p>
+      <p>Ton assistant pour préparer les EDN. Charge tes fiches Lisa, personnalise tes instructions, et commence à réviser.</p>
       <div class="suggestions">
         <button class="suggestion-btn" onclick="sendQuick('Je suis en D3 et je veux m\'entraîner en cardiologie. Fais-moi un dossier progressif sur l\'insuffisance cardiaque.')">
           <span class="label">Dossier progressif</span>
@@ -395,9 +344,9 @@
           <span class="label">Cas clinique interactif</span>
           Joue l'interne de garde en pédiatrie
         </button>
-        <button class="suggestion-btn" onclick="sendQuick('Il me reste 3 mois avant les EDN. Je suis faible en neuro et en pédiatrie, mais bien en cardio et pneumo. Aide-moi à faire un planning.')">
-          <span class="label">Coaching</span>
-          Plan de révision personnalisé sur 3 mois
+        <button class="suggestion-btn" onclick="togglePanel()">
+          <span class="label">&#x2699; Charger mes fiches Lisa</span>
+          Ajoute tes fiches PDF pour des QCM basés sur ton cours
         </button>
       </div>
     </div>
@@ -406,158 +355,205 @@
   <div class="stats-bar" id="statsBar" style="display: none;">
     <span id="questionCount">0 questions</span>
     <span id="sessionTime">0 min</span>
+    <span id="fichesCount">0 fiches</span>
   </div>
 
   <div class="input-area">
     <div class="input-wrapper">
-      <textarea
-        id="messageInput"
-        placeholder="QCM sur..., Fiche item..., Cas clinique en..., ou ta question"
-        rows="1"
-        onkeydown="handleKeydown(event)"
-        oninput="autoResize(this)"
-      ></textarea>
+      <button class="attach-btn" onclick="document.getElementById('quickFileInput').click()" title="Joindre une fiche">
+        &#x1F4CE;
+      </button>
+      <input type="file" id="quickFileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.txt,.md" style="display:none" onchange="handleFiles(this.files)">
+      <textarea id="messageInput" placeholder="QCM sur..., Fiche item..., Cas clinique en..., ou ta question" rows="1" onkeydown="handleKeydown(event)" oninput="autoResize(this)"></textarea>
       <button class="send-btn" id="sendBtn" onclick="sendMessage()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
       </button>
     </div>
   </div>
 
   <script>
-    // State
     let messages = [];
     let isLoading = false;
     let questionCount = 0;
     let sessionStart = Date.now();
+    let uploadedFiles = [];
 
-    // Auto-resize textarea
-    function autoResize(el) {
-      el.style.height = 'auto';
-      el.style.height = Math.min(el.scrollHeight, 150) + 'px';
+    // Load saved settings
+    document.getElementById('customInstructions').value = localStorage.getItem('edn_instructions') || '';
+    const savedLevel = localStorage.getItem('edn_level') || '';
+    if (savedLevel) document.getElementById('levelSelect').value = savedLevel;
+    document.getElementById('levelSelect').addEventListener('change', function() {
+      localStorage.setItem('edn_level', this.value);
+    });
+
+    // Panel toggle
+    function togglePanel() {
+      document.getElementById('sidePanel').classList.toggle('open');
+      document.getElementById('panelOverlay').classList.toggle('open');
+      document.getElementById('panelBtn').classList.toggle('active');
     }
 
-    // Handle Enter key
-    function handleKeydown(e) {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
+    // Save instructions
+    function saveInstructions() {
+      localStorage.setItem('edn_instructions', document.getElementById('customInstructions').value);
+      const fb = document.getElementById('saveFeedback');
+      fb.style.opacity = '1';
+      setTimeout(() => fb.style.opacity = '0', 2000);
+    }
+
+    // File handling
+    function handleFiles(fileList) {
+      for (const file of fileList) {
+        if (file.size > 10 * 1024 * 1024) { alert(`"${file.name}" dépasse 10 Mo.`); continue; }
+        readFile(file);
+      }
+      document.getElementById('fileInput').value = '';
+      document.getElementById('quickFileInput').value = '';
+    }
+
+    function readFile(file) {
+      const reader = new FileReader();
+      const entry = { name: file.name, size: file.size, mediaType: file.type, type: getFileType(file), data: null, status: 'loading' };
+      uploadedFiles.push(entry);
+      renderFileList(); updateBadge();
+
+      if (entry.type === 'text') {
+        reader.onload = e => { entry.data = e.target.result; entry.status = 'ready'; renderFileList(); };
+        reader.readAsText(file);
+      } else {
+        reader.onload = e => { entry.data = e.target.result.split(',')[1]; entry.status = 'ready'; renderFileList(); };
+        reader.readAsDataURL(file);
       }
     }
 
-    // Send a quick action
-    function sendQuick(text) {
-      document.getElementById('messageInput').value = text;
-      sendMessage();
+    function getFileType(file) {
+      if (file.type === 'application/pdf') return 'pdf';
+      if (file.type.startsWith('image/')) return 'image';
+      return 'text';
     }
 
-    // Add message to UI
-    function addMessageUI(role, content) {
+    function removeFile(i) { uploadedFiles.splice(i, 1); renderFileList(); updateBadge(); }
+
+    function formatSize(b) {
+      if (b < 1024) return b + ' o';
+      if (b < 1048576) return Math.round(b / 1024) + ' Ko';
+      return (b / 1048576).toFixed(1) + ' Mo';
+    }
+
+    function renderFileList() {
+      const list = document.getElementById('fileList');
+      list.innerHTML = uploadedFiles.map((f, i) => `
+        <div class="file-item">
+          <span>${f.type === 'pdf' ? '&#x1F4D5;' : f.type === 'image' ? '&#x1F5BC;' : '&#x1F4C4;'}</span>
+          <span class="file-name">${f.name}</span>
+          <span class="file-size">${formatSize(f.size)}</span>
+          <span class="file-status ${f.status}">${f.status === 'ready' ? 'Prêt' : '...'}</span>
+          <button class="file-remove" onclick="removeFile(${i})">&#x2715;</button>
+        </div>`).join('');
+      updateStats();
+    }
+
+    function updateBadge() {
+      const b = document.getElementById('filesBadge');
+      b.style.display = uploadedFiles.length > 0 ? 'flex' : 'none';
+      b.textContent = uploadedFiles.length;
+    }
+
+    // Drag & drop
+    const zone = document.getElementById('uploadZone');
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+    zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+
+    function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 150) + 'px'; }
+    function handleKeydown(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
+    function sendQuick(text) { document.getElementById('messageInput').value = text; sendMessage(); }
+
+    function addMessageUI(role, content, files) {
       const welcome = document.getElementById('welcome');
       if (welcome) welcome.remove();
-
       const container = document.getElementById('chatContainer');
       const div = document.createElement('div');
       div.className = `message ${role}`;
-
       const avatar = document.createElement('div');
       avatar.className = 'message-avatar';
-      avatar.textContent = role === 'user' ? '👨‍⚕️' : 'E';
-
+      avatar.textContent = role === 'user' ? '\u{1F468}‍⚕️' : 'E';
       const contentDiv = document.createElement('div');
       contentDiv.className = 'message-content';
-
-      if (role === 'assistant') {
-        contentDiv.innerHTML = marked.parse(content);
-      } else {
-        contentDiv.textContent = content;
+      if (files && files.length > 0 && role === 'user') {
+        const fd = document.createElement('div');
+        fd.className = 'attached-files';
+        fd.innerHTML = files.map(f => `<span class="file-pill">${f.type === 'pdf' ? '&#x1F4D5;' : '&#x1F5BC;'} ${f.name}</span>`).join('');
+        contentDiv.appendChild(fd);
       }
-
+      const td = document.createElement('div');
+      td.innerHTML = role === 'assistant' ? marked.parse(content) : '';
+      if (role === 'user') td.textContent = content;
+      contentDiv.appendChild(td);
       div.appendChild(avatar);
       div.appendChild(contentDiv);
       container.appendChild(div);
       container.scrollTop = container.scrollHeight;
-
-      return contentDiv;
     }
 
-    // Show typing indicator
     function showTyping() {
       const container = document.getElementById('chatContainer');
-      const div = document.createElement('div');
-      div.className = 'message assistant';
-      div.id = 'typingIndicator';
-
-      const avatar = document.createElement('div');
-      avatar.className = 'message-avatar';
-      avatar.textContent = 'E';
-
-      const contentDiv = document.createElement('div');
-      contentDiv.className = 'message-content';
-      contentDiv.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
-
-      div.appendChild(avatar);
-      div.appendChild(contentDiv);
-      container.appendChild(div);
+      const div = document.createElement('div'); div.className = 'message assistant'; div.id = 'typingIndicator';
+      const av = document.createElement('div'); av.className = 'message-avatar'; av.textContent = 'E';
+      const cd = document.createElement('div'); cd.className = 'message-content';
+      cd.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+      div.appendChild(av); div.appendChild(cd); container.appendChild(div);
       container.scrollTop = container.scrollHeight;
     }
+    function removeTyping() { const el = document.getElementById('typingIndicator'); if (el) el.remove(); }
 
-    function removeTyping() {
-      const el = document.getElementById('typingIndicator');
-      if (el) el.remove();
-    }
-
-    // Update stats
     function updateStats() {
-      const statsBar = document.getElementById('statsBar');
-      statsBar.style.display = 'flex';
+      document.getElementById('statsBar').style.display = 'flex';
       document.getElementById('questionCount').textContent = `${questionCount} question${questionCount > 1 ? 's' : ''}`;
-      const mins = Math.round((Date.now() - sessionStart) / 60000);
-      document.getElementById('sessionTime').textContent = `${mins} min de révision`;
+      document.getElementById('sessionTime').textContent = `${Math.round((Date.now() - sessionStart) / 60000)} min`;
+      document.getElementById('fichesCount').textContent = `${uploadedFiles.length} fiche${uploadedFiles.length > 1 ? 's' : ''}`;
     }
 
-    // Send message
     async function sendMessage() {
       const input = document.getElementById('messageInput');
       const text = input.value.trim();
       if (!text || isLoading) return;
 
       isLoading = true;
-      input.value = '';
-      input.style.height = 'auto';
+      input.value = ''; input.style.height = 'auto';
       document.getElementById('sendBtn').disabled = true;
 
-      // Add user message
-      messages.push({ role: 'user', content: text });
-      addMessageUI('user', text);
+      const readyFiles = uploadedFiles.filter(f => f.status === 'ready');
+      const userMsg = { role: 'user', content: text };
+      if (readyFiles.length > 0) {
+        userMsg.files = readyFiles.map(f => ({ name: f.name, type: f.type, mediaType: f.mediaType, data: f.data }));
+      }
+
+      messages.push(userMsg);
+      addMessageUI('user', text, readyFiles);
       questionCount++;
       updateStats();
-
       showTyping();
 
       try {
-        const level = document.getElementById('levelSelect').value;
-
         const response = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages, level }),
+          body: JSON.stringify({
+            messages,
+            level: document.getElementById('levelSelect').value,
+            customInstructions: document.getElementById('customInstructions').value,
+            files: readyFiles.map(f => ({ name: f.name, type: f.type }))
+          }),
         });
-
-        if (!response.ok) {
-          throw new Error(`Erreur ${response.status}`);
-        }
-
+        if (!response.ok) throw new Error(`Erreur ${response.status}`);
         const data = await response.json();
         removeTyping();
-
         messages.push({ role: 'assistant', content: data.response });
         addMessageUI('assistant', data.response);
-
       } catch (error) {
         removeTyping();
-        addMessageUI('assistant', `**Erreur** : ${error.message}\n\nVérifie que la clé API est bien configurée dans les variables d'environnement Vercel (ANTHROPIC_API_KEY).`);
+        addMessageUI('assistant', `**Erreur** : ${error.message}\n\nVérifie la clé API dans Vercel (ANTHROPIC_API_KEY).`);
       }
 
       isLoading = false;
@@ -565,6 +561,5 @@
       input.focus();
     }
   </script>
-
 </body>
 </html>
