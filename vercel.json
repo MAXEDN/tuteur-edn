@@ -12,11 +12,15 @@
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
-    {
-      "src": "/sw.js",
-      "dest": "/public/sw.js",
-      "headers": { "Cache-Control": "no-cache", "Service-Worker-Allowed": "/" }
-    },
     { "src": "/(.*)", "dest": "/public/$1" }
+  ],
+  "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache" },
+        { "key": "Service-Worker-Allowed", "value": "/" }
+      ]
+    }
   ]
 }
