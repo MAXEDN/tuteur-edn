@@ -2,8 +2,15 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Tuteur EDN — Préparation aux EDN</title>
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Tuteur EDN">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -556,6 +563,58 @@
     }
 
     updateAvgScoreBar();
+
+    // --- PWA : Service Worker + Install prompt ---
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('SW registered:', reg.scope))
+          .catch(err => console.log('SW registration failed:', err));
+      });
+    }
+
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      showInstallBanner();
+    });
+
+    function showInstallBanner() {
+      if (document.getElementById('install-banner')) return;
+      const banner = document.createElement('div');
+      banner.id = 'install-banner';
+      banner.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--primary);color:#fff;padding:12px 20px;border-radius:12px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(37,99,235,.4);z-index:200;font-size:14px;max-width:90vw';
+      banner.innerHTML = `
+        <span>Installer Tuteur EDN sur cet appareil</span>
+        <button onclick="installPWA()" style="background:#fff;color:var(--primary);border:none;padding:6px 14px;border-radius:8px;font-weight:600;cursor:pointer;white-space:nowrap">Installer</button>
+        <button onclick="this.parentElement.remove()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:0 4px">&times;</button>
+      `;
+      document.body.appendChild(banner);
+    }
+
+    function installPWA() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(choice => {
+        deferredPrompt = null;
+        const banner = document.getElementById('install-banner');
+        if (banner) banner.remove();
+      });
+    }
+
+    // Indicateur hors-ligne
+    window.addEventListener('offline', () => {
+      const bar = document.createElement('div');
+      bar.id = 'offline-bar';
+      bar.style.cssText = 'position:fixed;top:0;left:0;right:0;background:var(--warning);color:#000;text-align:center;padding:6px;font-size:13px;font-weight:500;z-index:300';
+      bar.textContent = 'Mode hors-ligne — les réponses du tuteur ne sont pas disponibles';
+      document.body.appendChild(bar);
+    });
+    window.addEventListener('online', () => {
+      const bar = document.getElementById('offline-bar');
+      if (bar) bar.remove();
+    });
   </script>
 </body>
 </html>
