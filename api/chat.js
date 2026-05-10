@@ -66,7 +66,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { messages, level, customInstructions, files, examMode } = req.body;
+    const { messages, level, customInstructions, files, examMode, stream } = req.body;
 
     const client = new Anthropic();
 
@@ -109,7 +109,6 @@ L'étudiant est en mode examen chronométré. Voici les règles spéciales :
       if (msg.files && msg.files.length > 0) {
         const content = [];
 
-        // Add file content blocks
         for (const file of msg.files) {
           if (file.type === "image") {
             content.push({
@@ -145,7 +144,6 @@ L'étudiant est en mode examen chronométré. Voici les règles spéciales :
           }
         }
 
-        // Add the text message
         if (msg.content) {
           content.push({ type: "text", text: msg.content });
         }
@@ -156,6 +154,31 @@ L'étudiant est en mode examen chronométré. Voici les règles spéciales :
       return msg;
     });
 
+    // --- STREAMING MODE ---
+    if (stream) {
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("Connection", "keep-alive");
+
+      const streamResponse = await client.messages.stream({
+        model: "claude-sonnet-4-6",
+        max_tokens: 4096,
+        system,
+        messages: processedMessages,
+      });
+
+      for await (const event of streamResponse) {
+        if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+          res.write(`data: ${JSON.stringify({ text: event.delta.text })}\n\n`);
+        }
+      }
+
+      res.write(`data: [DONE]\n\n`);
+      res.end();
+      return;
+    }
+
+    // --- NON-STREAMING (fallback) ---
     const response = await client.messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 4096,

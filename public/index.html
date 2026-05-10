@@ -566,29 +566,70 @@
       messages.push(userMsg);addMessageUI('user',text,readyFiles);questionCount++;updateStats();showTyping();
 
       try{
-        const body={messages,level:document.getElementById('levelSelect').value,customInstructions:document.getElementById('customInstructions').value,files:readyFiles.map(f=>({name:f.name,type:f.type}))};
+        const body={messages,stream:true,level:document.getElementById('levelSelect').value,customInstructions:document.getElementById('customInstructions').value,files:readyFiles.map(f=>({name:f.name,type:f.type}))};
         if(examState.active){body.examMode={active:true,type:examState.type,specialty:examState.specialty,difficulty:examState.difficulty,questionCount:examState.questionCount}}
 
         const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
         if(!response.ok)throw new Error(`Erreur ${response.status}`);
-        const data=await response.json();removeTyping();
 
-        const scoreData=parseScoreData(data.response);
-        const cleanResponse=stripScoreData(data.response);
+        removeTyping();
+
+        // Create assistant message element for streaming
+        const w=document.getElementById('welcome');if(w)w.remove();
+        const c=document.getElementById('chatContainer'),d=document.createElement('div');
+        d.className='message assistant';
+        const av=document.createElement('div');av.className='message-avatar';av.textContent='E';
+        const cd=document.createElement('div');cd.className='message-content';
+        const td=document.createElement('div');
+        cd.appendChild(td);d.appendChild(av);d.appendChild(cd);c.appendChild(d);
+
+        // Read the stream
+        let fullText='';
+        const reader=response.body.getReader();
+        const decoder=new TextDecoder();
+        let buffer='';
+
+        while(true){
+          const {done,value}=await reader.read();
+          if(done)break;
+          buffer+=decoder.decode(value,{stream:true});
+
+          const lines=buffer.split('\n');
+          buffer=lines.pop()||'';
+
+          for(const line of lines){
+            if(line.startsWith('data: ')){
+              const data=line.slice(6);
+              if(data==='[DONE]')break;
+              try{
+                const parsed=JSON.parse(data);
+                if(parsed.text){
+                  fullText+=parsed.text;
+                  td.innerHTML=marked.parse(fullText);
+                  c.scrollTop=c.scrollHeight;
+                }
+              }catch(e){}
+            }
+          }
+        }
+
+        // Process score data from full response
+        const scoreData=parseScoreData(fullText);
+        const cleanResponse=stripScoreData(fullText);
+
+        // Update displayed text without score block
+        td.innerHTML=marked.parse(cleanResponse);
 
         if(scoreData){
           saveScore(scoreData);
           if(scoreData.errors&&scoreData.errors.length>0)saveErrors(scoreData.errors,scoreData.specialty,scoreData.item);
-          // Process SRS review results
           processSRSResults(scoreData);
           updateStats();
           updateSRSDueCount();
-          // End exam if we got a score back
           if(examState.active)endExam();
         }
 
         messages.push({role:'assistant',content:cleanResponse});
-        addMessageUI('assistant',cleanResponse);
       }catch(error){removeTyping();addMessageUI('assistant',`**Erreur** : ${error.message}\n\nVérifie la clé API dans Vercel.`)}
       isLoading=false;document.getElementById('sendBtn').disabled=false;input.focus();
     }
