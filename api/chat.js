@@ -66,7 +66,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { messages, level, customInstructions, files } = req.body;
+    const { messages, level, customInstructions, files, examMode } = req.body;
 
     const client = new Anthropic();
 
@@ -75,6 +75,25 @@ export default async function handler(req, res) {
 
     if (level) {
       system += `\n\nL'étudiant est en ${level}. Adapte la difficulté en conséquence.`;
+    }
+
+    if (examMode && examMode.active) {
+      system += `\n\n## MODE EXAMEN ACTIVÉ
+L'étudiant est en mode examen chronométré. Voici les règles spéciales :
+- Type d'épreuve : ${examMode.type} (${examMode.questionCount} questions en ${examMode.specialty || 'toutes spécialités'})
+- Difficulté : ${examMode.difficulty || 'moyen'}
+- Pose TOUTES les questions d'un coup dans un seul message (numérotées de 1 à ${examMode.questionCount})
+- Chaque question doit avoir 5 propositions (A à E)
+- NE donne PAS les réponses ni la correction tout de suite
+- Attends que l'étudiant envoie TOUTES ses réponses
+- Quand il envoie ses réponses, corrige tout d'un coup avec un BILAN FINAL contenant :
+  1. Score global (X/${examMode.questionCount})
+  2. Détail question par question (correct/incorrect + explication courte)
+  3. Points forts et points faibles identifiés
+  4. Conseil de révision ciblé
+- Le bloc SCORE_DATA est obligatoire dans la correction finale
+- Sois strict sur la notation : pas de points partiels, c'est juste ou faux
+- Simule les conditions réelles : questions variées, pièges inclus, pas d'aide`;
     }
 
     if (customInstructions && customInstructions.trim()) {

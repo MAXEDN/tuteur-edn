@@ -36,7 +36,6 @@
     .panel-section{margin-bottom:24px}
     .panel-section h3{font-size:13px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
 
-    /* Upload */
     .upload-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;transition:all .2s}
     .upload-zone:hover,.upload-zone.dragover{border-color:var(--primary);background:var(--primary-light)}
     .upload-zone p{font-size:13px;color:var(--text-muted)}
@@ -47,10 +46,8 @@
     .file-item .file-size{color:var(--text-muted);font-size:11px}
     .file-status{font-size:11px;padding:2px 6px;border-radius:4px;font-weight:500}
     .file-status.ready{background:var(--accent-light);color:var(--accent)}
-    .file-status.loading{background:var(--warning-light);color:var(--warning)}
     .file-remove{width:20px;height:20px;border:none;background:none;cursor:pointer;color:var(--danger);font-size:16px;display:flex;align-items:center;justify-content:center;border-radius:4px}
     .file-remove:hover{background:#fee2e2}
-
     .instructions-textarea{width:100%;min-height:80px;padding:12px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;resize:vertical;outline:none;line-height:1.5}
     .instructions-textarea:focus{border-color:var(--primary)}
     .instructions-hint{font-size:11px;color:var(--text-muted);margin-top:6px}
@@ -61,39 +58,61 @@
     /* Dashboard */
     .dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
     .dash-card{background:var(--bg);border-radius:10px;padding:14px;text-align:center}
-    .dash-card .dc-value{font-size:24px;font-weight:700;color:var(--text)}
+    .dash-card .dc-value{font-size:24px;font-weight:700}
     .dash-card .dc-label{font-size:11px;color:var(--text-muted);margin-top:2px}
-    .dash-card.green .dc-value{color:var(--accent)}
-    .dash-card.blue .dc-value{color:var(--primary)}
-    .dash-card.orange .dc-value{color:var(--warning)}
-    .dash-card.red .dc-value{color:var(--danger)}
-
+    .dash-card.green .dc-value{color:var(--accent)}.dash-card.blue .dc-value{color:var(--primary)}.dash-card.orange .dc-value{color:var(--warning)}.dash-card.red .dc-value{color:var(--danger)}
     .spec-bar{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:13px}
     .spec-bar .spec-name{width:120px;text-align:right;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .spec-bar .spec-track{flex:1;height:20px;background:var(--bg);border-radius:10px;overflow:hidden;position:relative}
+    .spec-bar .spec-track{flex:1;height:20px;background:var(--bg);border-radius:10px;overflow:hidden}
     .spec-bar .spec-fill{height:100%;border-radius:10px;transition:width .5s;min-width:2px}
     .spec-bar .spec-pct{width:40px;font-weight:600;font-size:12px}
-
     .error-item{padding:10px 14px;background:var(--bg);border-radius:8px;margin-bottom:8px;font-size:13px;border-left:3px solid var(--danger)}
     .error-item .ei-q{font-weight:500;margin-bottom:4px}
     .error-item .ei-detail{color:var(--text-muted);line-height:1.4}
     .error-item .ei-lesson{color:var(--primary-dark);font-weight:500;margin-top:4px}
     .error-item .ei-meta{font-size:11px;color:var(--text-muted);margin-top:4px}
-
     .tab-bar{display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid var(--border)}
     .tab-btn{padding:8px 16px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:500;color:var(--text-muted);border-bottom:2px solid transparent;transition:all .2s}
     .tab-btn.active{color:var(--primary);border-bottom-color:var(--primary)}
-    .tab-content{display:none}
-    .tab-content.active{display:block}
-
+    .tab-content{display:none}.tab-content.active{display:block}
     .clear-data-btn{margin-top:16px;padding:6px 14px;border:1px solid var(--danger);background:none;color:var(--danger);border-radius:8px;font-size:12px;cursor:pointer}
     .clear-data-btn:hover{background:#fee2e2}
+
+    /* Exam mode */
+    .exam-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
+    .exam-modal-overlay.open{display:flex}
+    .exam-modal{background:var(--surface);border-radius:16px;padding:28px;width:420px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+    .exam-modal h2{font-size:20px;font-weight:700;margin-bottom:4px}
+    .exam-modal .em-sub{font-size:13px;color:var(--text-muted);margin-bottom:20px}
+    .em-field{margin-bottom:16px}
+    .em-field label{display:block;font-size:13px;font-weight:500;margin-bottom:6px}
+    .em-field select,.em-field input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;outline:none}
+    .em-field select:focus,.em-field input:focus{border-color:var(--primary)}
+    .em-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .em-start{width:100%;padding:12px;background:var(--danger);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px;transition:background .2s}
+    .em-start:hover{background:#dc2626}
+
+    /* Timer bar */
+    .timer-bar{display:none;padding:8px 20px;background:#1e293b;color:#fff;flex-shrink:0;align-items:center;justify-content:space-between;font-size:14px}
+    .timer-bar.active{display:flex}
+    .timer-bar .tb-left{display:flex;align-items:center;gap:12px}
+    .timer-bar .tb-label{font-size:12px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px}
+    .timer-bar .tb-time{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+    .timer-bar .tb-time.urgent{color:#f87171;animation:pulse 1s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+    .timer-bar .tb-progress{flex:1;height:4px;background:#334155;border-radius:2px;margin:0 16px;overflow:hidden}
+    .timer-bar .tb-fill{height:100%;background:var(--primary);border-radius:2px;transition:width 1s linear}
+    .timer-bar .tb-fill.urgent{background:#f87171}
+    .tb-quit{padding:6px 14px;background:transparent;border:1px solid #475569;color:#94a3b8;border-radius:6px;font-size:12px;cursor:pointer}
+    .tb-quit:hover{border-color:#f87171;color:#f87171}
 
     /* Quick actions */
     .quick-actions{padding:12px 20px;display:flex;gap:8px;overflow-x:auto;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);-webkit-overflow-scrolling:touch}
     .quick-actions::-webkit-scrollbar{display:none}
     .quick-btn{flex-shrink:0;padding:8px 16px;border:1px solid var(--border);border-radius:20px;background:var(--surface);font-size:13px;cursor:pointer;transition:all .2s;white-space:nowrap;color:var(--text)}
     .quick-btn:hover{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
+    .quick-btn.exam-btn{border-color:var(--danger);color:var(--danger)}
+    .quick-btn.exam-btn:hover{background:#fee2e2}
 
     .attached-files{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
     .file-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:rgba(255,255,255,.2);border-radius:12px;font-size:11px}
@@ -106,10 +125,11 @@
     .suggestion-btn{padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);text-align:left;cursor:pointer;transition:all .2s;font-size:14px;line-height:1.4;color:var(--text)}
     .suggestion-btn:hover{border-color:var(--primary);box-shadow:var(--shadow)}
     .suggestion-btn .label{font-weight:600;color:var(--primary);display:block;margin-bottom:2px;font-size:13px}
+    .suggestion-btn.exam-suggest{border-color:var(--danger)}
+    .suggestion-btn.exam-suggest .label{color:var(--danger)}
 
     .message{max-width:800px;width:100%;margin:0 auto;display:flex;gap:12px}
-    .message.user{justify-content:flex-end}
-    .message.assistant{justify-content:flex-start}
+    .message.user{justify-content:flex-end}.message.assistant{justify-content:flex-start}
     .message-avatar{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
     .message.assistant .message-avatar{background:var(--primary);color:#fff}
     .message.user .message-avatar{background:var(--accent);color:#fff;order:2}
@@ -117,9 +137,7 @@
     .message.user .message-content{background:var(--primary);color:#fff;border-bottom-right-radius:4px}
     .message.assistant .message-content{background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:4px;box-shadow:var(--shadow)}
     .message.assistant .message-content h1,.message.assistant .message-content h2,.message.assistant .message-content h3{margin-top:16px;margin-bottom:8px}
-    .message.assistant .message-content h1{font-size:18px}
-    .message.assistant .message-content h2{font-size:16px}
-    .message.assistant .message-content h3{font-size:14px}
+    .message.assistant .message-content h1{font-size:18px}.message.assistant .message-content h2{font-size:16px}.message.assistant .message-content h3{font-size:14px}
     .message.assistant .message-content p{margin-bottom:8px}
     .message.assistant .message-content ul,.message.assistant .message-content ol{margin:8px 0;padding-left:20px}
     .message.assistant .message-content li{margin-bottom:4px}
@@ -133,8 +151,7 @@
 
     .typing{display:flex;gap:4px;padding:8px 0}
     .typing span{width:8px;height:8px;background:var(--text-muted);border-radius:50%;animation:bounce 1.4s infinite ease-in-out}
-    .typing span:nth-child(2){animation-delay:.2s}
-    .typing span:nth-child(3){animation-delay:.4s}
+    .typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
     @keyframes bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
 
     .input-area{padding:12px 20px 20px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0}
@@ -151,7 +168,7 @@
     .stats-bar{padding:6px 20px;background:var(--accent-light);display:flex;justify-content:center;gap:24px;font-size:12px;color:var(--accent);font-weight:500;flex-shrink:0;cursor:pointer}
     .stats-bar:hover{background:#a7f3d0}
 
-    @media(max-width:640px){.header h1{font-size:15px}.quick-actions{padding:8px 12px;gap:6px}.quick-btn{padding:6px 12px;font-size:12px}.chat-container{padding:12px;gap:12px}.message-content{max-width:90%}.input-area{padding:8px 12px 16px}.side-panel{width:100%;max-width:100%}.spec-bar .spec-name{width:80px;font-size:11px}}
+    @media(max-width:640px){.header h1{font-size:15px}.quick-actions{padding:8px 12px;gap:6px}.quick-btn{padding:6px 12px;font-size:12px}.chat-container{padding:12px;gap:12px}.message-content{max-width:90%}.input-area{padding:8px 12px 16px}.side-panel{width:100%;max-width:100%}.exam-modal{width:95vw;padding:20px}.spec-bar .spec-name{width:80px;font-size:11px}}
   </style>
 </head>
 <body>
@@ -175,6 +192,79 @@
     </div>
   </div>
 
+  <!-- Timer Bar -->
+  <div class="timer-bar" id="timerBar">
+    <div class="tb-left">
+      <span class="tb-label">&#x23F1; Examen en cours</span>
+      <span class="tb-time" id="timerDisplay">00:00</span>
+    </div>
+    <div class="tb-progress"><div class="tb-fill" id="timerFill"></div></div>
+    <button class="tb-quit" onclick="quitExam()">Abandonner</button>
+  </div>
+
+  <!-- Exam Modal -->
+  <div class="exam-modal-overlay" id="examOverlay">
+    <div class="exam-modal">
+      <h2>&#x23F1; Mode Examen</h2>
+      <div class="em-sub">Conditions réelles : chrono, pas de retour en arrière, score final.</div>
+      <div class="em-field">
+        <label>Type d'épreuve</label>
+        <select id="examType">
+          <option value="qcm">QCM isolés</option>
+          <option value="dossier">Dossier progressif</option>
+        </select>
+      </div>
+      <div class="em-row">
+        <div class="em-field">
+          <label>Spécialité</label>
+          <select id="examSpecialty">
+            <option value="">Toutes</option>
+            <option>Cardiologie</option>
+            <option>Pneumologie</option>
+            <option>Neurologie</option>
+            <option>Hépato-gastro-entérologie</option>
+            <option>Pédiatrie</option>
+            <option>Gynéco-obstétrique</option>
+            <option>Endocrinologie</option>
+            <option>Néphrologie</option>
+            <option>Infectiologie</option>
+            <option>Psychiatrie</option>
+            <option>Rhumatologie</option>
+            <option>Dermatologie</option>
+            <option>Urgences</option>
+            <option>Médecine interne</option>
+            <option>ORL</option>
+            <option>Ophtalmologie</option>
+          </select>
+        </div>
+        <div class="em-field">
+          <label>Difficulté</label>
+          <select id="examDifficulty">
+            <option value="facile">Facile</option>
+            <option value="moyen" selected>Moyen</option>
+            <option value="difficile">Difficile</option>
+          </select>
+        </div>
+      </div>
+      <div class="em-row">
+        <div class="em-field">
+          <label>Nombre de questions</label>
+          <select id="examCount">
+            <option value="5">5 questions</option>
+            <option value="10" selected>10 questions</option>
+            <option value="15">15 questions</option>
+            <option value="20">20 questions</option>
+          </select>
+        </div>
+        <div class="em-field">
+          <label>Durée (minutes)</label>
+          <input type="number" id="examDuration" value="15" min="5" max="120" step="5">
+        </div>
+      </div>
+      <button class="em-start" onclick="startExam()">&#x1F3AF; Lancer l'examen</button>
+    </div>
+  </div>
+
   <!-- Settings Panel -->
   <div class="panel-overlay" id="panelOverlay" onclick="togglePanel()"></div>
   <div class="side-panel" id="sidePanel">
@@ -185,14 +275,14 @@
         <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
           <div style="font-size:28px;margin-bottom:6px">&#x1F4C2;</div>
           <p>Clique ou glisse tes fiches ici</p>
-          <div class="formats">PDF, images (JPG, PNG), texte — max 10 Mo/fichier</div>
+          <div class="formats">PDF, images, texte — max 10 Mo/fichier</div>
         </div>
         <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.txt,.md" style="display:none" onchange="handleFiles(this.files)">
         <div class="file-list" id="fileList"></div>
       </div>
       <div class="panel-section">
         <h3>Instructions personnalisées</h3>
-        <textarea class="instructions-textarea" id="customInstructions" placeholder="Ex: Je suis en D4, mes points faibles : neuro, pédiatrie.&#10;Insiste sur la sémiologie. Fais 10 QCM par série."></textarea>
+        <textarea class="instructions-textarea" id="customInstructions" placeholder="Ex: D4, points faibles : neuro, pédiatrie.&#10;Insiste sur la sémiologie. 10 QCM par série."></textarea>
         <div class="instructions-hint">Envoyées à chaque message pour personnaliser le tuteur.</div>
         <div style="display:flex;align-items:center;margin-top:10px">
           <button class="save-btn" onclick="saveInstructions()">Sauvegarder</button>
@@ -221,6 +311,7 @@
   </div>
 
   <div class="quick-actions">
+    <button class="quick-btn exam-btn" onclick="openExamModal()">&#x23F1; Mode Examen</button>
     <button class="quick-btn" onclick="sendQuick('QCM sur la cardiologie, niveau moyen')">&#x1F4DD; QCM Cardio</button>
     <button class="quick-btn" onclick="sendQuick('Dossier progressif en pneumologie')">&#x1F4CB; Dossier Pneumo</button>
     <button class="quick-btn" onclick="sendQuick('Fiche item 245 — Diabète')">&#x1F4C4; Fiche Diabète</button>
@@ -232,11 +323,11 @@
   <div class="chat-container" id="chatContainer">
     <div class="welcome" id="welcome">
       <h2>Bienvenue sur Tuteur EDN</h2>
-      <p>Ton assistant pour préparer les EDN. Charge tes fiches, personnalise tes instructions, et commence à réviser.</p>
+      <p>Ton assistant pour préparer les EDN. Charge tes fiches, personnalise tes instructions, et révise.</p>
       <div class="suggestions">
+        <button class="suggestion-btn exam-suggest" onclick="openExamModal()"><span class="label">&#x23F1; Mode Examen</span>Chrono, conditions réelles, score final — comme le jour J</button>
         <button class="suggestion-btn" onclick="sendQuick('Je suis en D3. Fais-moi un dossier progressif sur l\'insuffisance cardiaque.')"><span class="label">Dossier progressif</span>Insuffisance cardiaque — 10-15 questions</button>
         <button class="suggestion-btn" onclick="sendQuick('Fiche item 157 — Infections urinaires')"><span class="label">Fiche de révision</span>Item 157 — Infections urinaires</button>
-        <button class="suggestion-btn" onclick="sendQuick('Simule un cas clinique en pédiatrie. Je suis l\'interne de garde.')"><span class="label">Cas clinique interactif</span>Joue l'interne de garde en pédiatrie</button>
         <button class="suggestion-btn" onclick="togglePanel()"><span class="label">&#x2699; Charger mes fiches Lisa</span>Ajoute tes fiches PDF pour des QCM personnalisés</button>
       </div>
     </div>
@@ -261,8 +352,10 @@
   </div>
 
   <script>
-    let messages=[], isLoading=false, questionCount=0, sessionStart=Date.now(), uploadedFiles=[];
-    let evoChart=null;
+    let messages=[],isLoading=false,questionCount=0,sessionStart=Date.now(),uploadedFiles=[],evoChart=null;
+
+    // Exam state
+    let examState={active:false,type:'',specialty:'',difficulty:'',questionCount:0,duration:0,startTime:null,timerId:null};
 
     // Load saved settings
     document.getElementById('customInstructions').value=localStorage.getItem('edn_instructions')||'';
@@ -270,19 +363,83 @@
     if(savedLevel)document.getElementById('levelSelect').value=savedLevel;
     document.getElementById('levelSelect').addEventListener('change',function(){localStorage.setItem('edn_level',this.value)});
 
-    // Score data helpers
+    // Score helpers
     function getScores(){try{return JSON.parse(localStorage.getItem('edn_scores'))||[]}catch(e){return[]}}
     function saveScore(s){const scores=getScores();s.date=new Date().toISOString();scores.push(s);localStorage.setItem('edn_scores',JSON.stringify(scores))}
     function getErrors(){try{return JSON.parse(localStorage.getItem('edn_errors'))||[]}catch(e){return[]}}
-    function saveErrors(errs,specialty,item){const all=getErrors();const date=new Date().toISOString();errs.forEach(e=>{e.specialty=specialty;e.item=item;e.date=date;all.push(e)});localStorage.setItem('edn_errors',JSON.stringify(all))}
+    function saveErrors(errs,sp,it){const all=getErrors();const d=new Date().toISOString();errs.forEach(e=>{e.specialty=sp;e.item=it;e.date=d;all.push(e)});localStorage.setItem('edn_errors',JSON.stringify(all))}
+    function parseScoreData(t){const m=t.match(/<!--SCORE_DATA\s*([\s\S]*?)\s*SCORE_DATA-->/);if(!m)return null;try{return JSON.parse(m[1])}catch(e){return null}}
+    function stripScoreData(t){return t.replace(/<!--SCORE_DATA[\s\S]*?SCORE_DATA-->/g,'').trim()}
 
-    // Parse score from Claude's response
-    function parseScoreData(text){
-      const m=text.match(/<!--SCORE_DATA\s*([\s\S]*?)\s*SCORE_DATA-->/);
-      if(!m)return null;
-      try{return JSON.parse(m[1])}catch(e){return null}
+    // Exam Mode
+    function openExamModal(){document.getElementById('examOverlay').classList.add('open')}
+    function closeExamModal(){document.getElementById('examOverlay').classList.remove('open')}
+    document.getElementById('examOverlay').addEventListener('click',function(e){if(e.target===this)closeExamModal()});
+
+    function startExam(){
+      const type=document.getElementById('examType').value;
+      const specialty=document.getElementById('examSpecialty').value;
+      const difficulty=document.getElementById('examDifficulty').value;
+      const count=parseInt(document.getElementById('examCount').value);
+      const duration=parseInt(document.getElementById('examDuration').value);
+
+      examState={active:true,type,specialty,difficulty,questionCount:count,duration,startTime:Date.now(),timerId:null};
+      closeExamModal();
+
+      // Clear chat for exam
+      messages=[];
+      document.getElementById('chatContainer').innerHTML='';
+
+      // Show timer
+      const bar=document.getElementById('timerBar');
+      bar.classList.add('active');
+      updateTimer();
+      examState.timerId=setInterval(updateTimer,1000);
+
+      // Send exam prompt
+      const specText=specialty||'toutes spécialités';
+      const prompt=`[MODE EXAMEN] Lance-moi un examen de ${count} QCM en ${specText}, difficulté ${difficulty}. Pose toutes les questions d'un coup. J'ai ${duration} minutes.`;
+      document.getElementById('messageInput').value=prompt;
+      sendMessage();
     }
-    function stripScoreData(text){return text.replace(/<!--SCORE_DATA[\s\S]*?SCORE_DATA-->/g,'').trim()}
+
+    function updateTimer(){
+      if(!examState.active)return;
+      const elapsed=Math.floor((Date.now()-examState.startTime)/1000);
+      const total=examState.duration*60;
+      const remaining=Math.max(0,total-elapsed);
+      const mins=Math.floor(remaining/60);
+      const secs=remaining%60;
+      const display=document.getElementById('timerDisplay');
+      display.textContent=`${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+
+      const pct=Math.max(0,remaining/total*100);
+      const fill=document.getElementById('timerFill');
+      fill.style.width=pct+'%';
+
+      if(remaining<=60){display.classList.add('urgent');fill.classList.add('urgent')}
+      else{display.classList.remove('urgent');fill.classList.remove('urgent')}
+
+      if(remaining<=0){
+        clearInterval(examState.timerId);
+        addMessageUI('assistant','**&#x23F0; Temps écoulé !** Envoie tes réponses maintenant pour obtenir ta correction.');
+        // Don't end exam — let them still submit
+      }
+    }
+
+    function quitExam(){
+      if(!confirm('Abandonner l\'examen en cours ?'))return;
+      endExam();
+      addMessageUI('assistant','**Examen abandonné.** Tu peux reprendre quand tu veux en cliquant sur "Mode Examen".');
+    }
+
+    function endExam(){
+      examState.active=false;
+      if(examState.timerId)clearInterval(examState.timerId);
+      document.getElementById('timerBar').classList.remove('active');
+      document.getElementById('timerDisplay').classList.remove('urgent');
+      document.getElementById('timerFill').classList.remove('urgent');
+    }
 
     // Dashboard
     function toggleDashboard(){
@@ -294,112 +451,46 @@
     function switchTab(id,btn){
       document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('tab-'+id).classList.add('active');
+      btn.classList.add('active');document.getElementById('tab-'+id).classList.add('active');
       if(id==='evolution')renderEvoChart();
     }
 
     function renderDashboard(){
-      const scores=getScores();
-      const errors=getErrors();
-      const cards=document.getElementById('dashCards');
+      const scores=getScores(),errors=getErrors(),cards=document.getElementById('dashCards');
+      if(scores.length===0){cards.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-muted);font-size:14px">Pas encore de données. Fais des QCM pour voir ta progression !</div>';document.getElementById('specBars').innerHTML='';document.getElementById('errorList').innerHTML='<div style="text-align:center;color:var(--text-muted);font-size:14px;padding:20px">Aucune erreur enregistrée</div>';return}
+      const totalQ=scores.reduce((a,s)=>a+s.total_questions,0),totalC=scores.reduce((a,s)=>a+s.correct_answers,0),avgPct=Math.round(totalC/totalQ*100);
+      const cls=avgPct>=80?'green':avgPct>=60?'blue':avgPct>=40?'orange':'red';
+      cards.innerHTML=`<div class="dash-card ${cls}"><div class="dc-value">${avgPct}%</div><div class="dc-label">Score moyen</div></div><div class="dash-card blue"><div class="dc-value">${totalQ}</div><div class="dc-label">Questions</div></div><div class="dash-card"><div class="dc-value">${scores.length}</div><div class="dc-label">Sessions</div></div><div class="dash-card ${errors.length>0?'orange':'green'}"><div class="dc-value">${errors.length}</div><div class="dc-label">Erreurs</div></div>`;
 
-      if(scores.length===0){
-        cards.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-muted);font-size:14px">Pas encore de données. Fais des QCM pour voir ta progression !</div>';
-        document.getElementById('specBars').innerHTML='';
-        document.getElementById('errorList').innerHTML='<div style="text-align:center;color:var(--text-muted);font-size:14px;padding:20px">Aucune erreur enregistrée</div>';
-        return;
-      }
-
-      const totalQ=scores.reduce((a,s)=>a+s.total_questions,0);
-      const totalCorrect=scores.reduce((a,s)=>a+s.correct_answers,0);
-      const avgPct=Math.round(totalCorrect/totalQ*100);
-      const totalSessions=scores.length;
-      const avgClass=avgPct>=80?'green':avgPct>=60?'blue':avgPct>=40?'orange':'red';
-
-      cards.innerHTML=`
-        <div class="dash-card ${avgClass}"><div class="dc-value">${avgPct}%</div><div class="dc-label">Score moyen</div></div>
-        <div class="dash-card blue"><div class="dc-value">${totalQ}</div><div class="dc-label">Questions</div></div>
-        <div class="dash-card"><div class="dc-value">${totalSessions}</div><div class="dc-label">Sessions</div></div>
-        <div class="dash-card ${errors.length>0?'orange':'green'}"><div class="dc-value">${errors.length}</div><div class="dc-label">Erreurs</div></div>
-      `;
-
-      // Specialty bars
-      const specMap={};
-      scores.forEach(s=>{
-        const sp=s.specialty||'Autre';
-        if(!specMap[sp])specMap[sp]={total:0,correct:0};
-        specMap[sp].total+=s.total_questions;
-        specMap[sp].correct+=s.correct_answers;
-      });
+      const specMap={};scores.forEach(s=>{const sp=s.specialty||'Autre';if(!specMap[sp])specMap[sp]={total:0,correct:0};specMap[sp].total+=s.total_questions;specMap[sp].correct+=s.correct_answers});
       const specEntries=Object.entries(specMap).sort((a,b)=>(b[1].correct/b[1].total)-(a[1].correct/a[1].total));
-      document.getElementById('specBars').innerHTML=specEntries.map(([name,d])=>{
-        const pct=Math.round(d.correct/d.total*100);
-        const color=pct>=80?'var(--accent)':pct>=60?'var(--primary)':pct>=40?'var(--warning)':'var(--danger)';
-        return`<div class="spec-bar"><span class="spec-name">${name}</span><div class="spec-track"><div class="spec-fill" style="width:${pct}%;background:${color}"></div></div><span class="spec-pct" style="color:${color}">${pct}%</span></div>`;
-      }).join('')+`<div style="font-size:11px;color:var(--text-muted);margin-top:8px;text-align:center">${specEntries.length} spécialité${specEntries.length>1?'s':''} travaillée${specEntries.length>1?'s':''}</div>`;
+      document.getElementById('specBars').innerHTML=specEntries.map(([n,d])=>{const p=Math.round(d.correct/d.total*100);const c=p>=80?'var(--accent)':p>=60?'var(--primary)':p>=40?'var(--warning)':'var(--danger)';return`<div class="spec-bar"><span class="spec-name">${n}</span><div class="spec-track"><div class="spec-fill" style="width:${p}%;background:${c}"></div></div><span class="spec-pct" style="color:${c}">${p}%</span></div>`}).join('');
 
-      // Errors list
-      const recentErrors=errors.slice(-20).reverse();
-      document.getElementById('errorList').innerHTML=recentErrors.length===0
-        ?'<div style="text-align:center;color:var(--text-muted);font-size:14px;padding:20px">Aucune erreur. Bravo !</div>'
-        :recentErrors.map(e=>`
-          <div class="error-item">
-            <div class="ei-q">${e.question||'Question'}</div>
-            <div class="ei-detail">Attendu : <strong>${e.expected||'—'}</strong> | Répondu : ${e.got||'—'}</div>
-            ${e.key_lesson?`<div class="ei-lesson">${e.key_lesson}</div>`:''}
-            <div class="ei-meta">${e.specialty||''} ${e.item?'• '+e.item:''} • ${new Date(e.date).toLocaleDateString('fr-FR')}</div>
-          </div>
-        `).join('');
+      const re=errors.slice(-20).reverse();
+      document.getElementById('errorList').innerHTML=re.length===0?'<div style="text-align:center;color:var(--text-muted);font-size:14px;padding:20px">Aucune erreur !</div>':re.map(e=>`<div class="error-item"><div class="ei-q">${e.question||'Question'}</div><div class="ei-detail">Attendu : <strong>${e.expected||'—'}</strong> | Répondu : ${e.got||'—'}</div>${e.key_lesson?`<div class="ei-lesson">${e.key_lesson}</div>`:''}<div class="ei-meta">${e.specialty||''} ${e.item?'• '+e.item:''} • ${new Date(e.date).toLocaleDateString('fr-FR')}</div></div>`).join('');
     }
 
     function renderEvoChart(){
-      const scores=getScores();
-      if(scores.length===0)return;
+      const scores=getScores();if(scores.length===0)return;
       const ctx=document.getElementById('evoChart').getContext('2d');
-      const labels=scores.map((s,i)=>{const d=new Date(s.date);return d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})});
-      const data=scores.map(s=>s.score_percent);
-
       if(evoChart)evoChart.destroy();
-      evoChart=new Chart(ctx,{
-        type:'line',
-        data:{labels,datasets:[{label:'Score (%)',data,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,0.1)',fill:true,tension:.3,pointRadius:4,pointBackgroundColor:'#2563eb'}]},
-        options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}},x:{ticks:{maxRotation:45,font:{size:10}}}},plugins:{legend:{display:false}}}
-      });
+      evoChart=new Chart(ctx,{type:'line',data:{labels:scores.map(s=>new Date(s.date).toLocaleDateString('fr-FR',{day:'numeric',month:'short'})),datasets:[{label:'Score (%)',data:scores.map(s=>s.score_percent),borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.1)',fill:true,tension:.3,pointRadius:4,pointBackgroundColor:'#2563eb'}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}},x:{ticks:{maxRotation:45,font:{size:10}}}},plugins:{legend:{display:false}}}});
     }
 
-    // Update stats bar with avg score
-    function updateAvgScoreBar(){
-      const scores=getScores();
-      if(scores.length>0){
-        const avg=Math.round(scores.reduce((a,s)=>a+s.score_percent,0)/scores.length);
-        document.getElementById('avgScore').textContent=`Moy: ${avg}%`;
-      }
-    }
+    function updateAvgScoreBar(){const s=getScores();if(s.length>0){document.getElementById('avgScore').textContent=`Moy: ${Math.round(s.reduce((a,x)=>a+x.score_percent,0)/s.length)}%`}}
 
     // Panels
     function togglePanel(){document.getElementById('sidePanel').classList.toggle('open');document.getElementById('panelOverlay').classList.toggle('open');document.getElementById('panelBtn').classList.toggle('active')}
-    function saveInstructions(){localStorage.setItem('edn_instructions',document.getElementById('customInstructions').value);const fb=document.getElementById('saveFeedback');fb.style.opacity='1';setTimeout(()=>fb.style.opacity='0',2000)}
+    function saveInstructions(){localStorage.setItem('edn_instructions',document.getElementById('customInstructions').value);const f=document.getElementById('saveFeedback');f.style.opacity='1';setTimeout(()=>f.style.opacity='0',2000)}
 
     // Files
-    function handleFiles(fl){for(const f of fl){if(f.size>10*1024*1024){alert(`"${f.name}" dépasse 10 Mo.`);continue}readFile(f)}document.getElementById('fileInput').value='';document.getElementById('quickFileInput').value=''}
-    function readFile(file){
-      const reader=new FileReader();
-      const entry={name:file.name,size:file.size,mediaType:file.type,type:getFileType(file),data:null,status:'loading'};
-      uploadedFiles.push(entry);renderFileList();updateBadge();
-      if(entry.type==='text'){reader.onload=e=>{entry.data=e.target.result;entry.status='ready';renderFileList()};reader.readAsText(file)}
-      else{reader.onload=e=>{entry.data=e.target.result.split(',')[1];entry.status='ready';renderFileList()};reader.readAsDataURL(file)}
-    }
+    function handleFiles(fl){for(const f of fl){if(f.size>10485760){alert(`"${f.name}" > 10 Mo`);continue}readFile(f)}document.getElementById('fileInput').value='';document.getElementById('quickFileInput').value=''}
+    function readFile(file){const r=new FileReader(),e={name:file.name,size:file.size,mediaType:file.type,type:getFileType(file),data:null,status:'loading'};uploadedFiles.push(e);renderFileList();updateBadge();if(e.type==='text'){r.onload=ev=>{e.data=ev.target.result;e.status='ready';renderFileList()};r.readAsText(file)}else{r.onload=ev=>{e.data=ev.target.result.split(',')[1];e.status='ready';renderFileList()};r.readAsDataURL(file)}}
     function getFileType(f){if(f.type==='application/pdf')return'pdf';if(f.type.startsWith('image/'))return'image';return'text'}
     function removeFile(i){uploadedFiles.splice(i,1);renderFileList();updateBadge()}
     function formatSize(b){if(b<1024)return b+' o';if(b<1048576)return Math.round(b/1024)+' Ko';return(b/1048576).toFixed(1)+' Mo'}
-    function renderFileList(){
-      document.getElementById('fileList').innerHTML=uploadedFiles.map((f,i)=>`<div class="file-item"><span>${f.type==='pdf'?'&#x1F4D5;':f.type==='image'?'&#x1F5BC;':'&#x1F4C4;'}</span><span class="file-name">${f.name}</span><span class="file-size">${formatSize(f.size)}</span><span class="file-status ${f.status}">${f.status==='ready'?'Prêt':'...'}</span><button class="file-remove" onclick="removeFile(${i})">&#x2715;</button></div>`).join('');
-      updateStats();
-    }
+    function renderFileList(){document.getElementById('fileList').innerHTML=uploadedFiles.map((f,i)=>`<div class="file-item"><span>${f.type==='pdf'?'&#x1F4D5;':f.type==='image'?'&#x1F5BC;':'&#x1F4C4;'}</span><span class="file-name">${f.name}</span><span class="file-size">${formatSize(f.size)}</span><span class="file-status ${f.status}">${f.status==='ready'?'Prêt':'...'}</span><button class="file-remove" onclick="removeFile(${i})">&#x2715;</button></div>`).join('');updateStats()}
     function updateBadge(){const b=document.getElementById('filesBadge');b.style.display=uploadedFiles.length>0?'flex':'none';b.textContent=uploadedFiles.length}
-
-    // Drag & drop
     const zone=document.getElementById('uploadZone');
     zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('dragover')});
     zone.addEventListener('dragleave',()=>zone.classList.remove('dragover'));
@@ -415,8 +506,7 @@
       const av=document.createElement('div');av.className='message-avatar';av.textContent=role==='user'?'\u{1F468}‍⚕️':'E';
       const cd=document.createElement('div');cd.className='message-content';
       if(files&&files.length>0&&role==='user'){const fd=document.createElement('div');fd.className='attached-files';fd.innerHTML=files.map(f=>`<span class="file-pill">${f.type==='pdf'?'&#x1F4D5;':'&#x1F5BC;'} ${f.name}</span>`).join('');cd.appendChild(fd)}
-      const td=document.createElement('div');
-      if(role==='assistant')td.innerHTML=marked.parse(content);else td.textContent=content;
+      const td=document.createElement('div');if(role==='assistant')td.innerHTML=marked.parse(content);else td.textContent=content;
       cd.appendChild(td);d.appendChild(av);d.appendChild(cd);c.appendChild(d);c.scrollTop=c.scrollHeight;
     }
 
@@ -441,12 +531,13 @@
       messages.push(userMsg);addMessageUI('user',text,readyFiles);questionCount++;updateStats();showTyping();
 
       try{
-        const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages,level:document.getElementById('levelSelect').value,customInstructions:document.getElementById('customInstructions').value,files:readyFiles.map(f=>({name:f.name,type:f.type}))})});
-        if(!response.ok)throw new Error(`Erreur ${response.status}`);
-        const data=await response.json();
-        removeTyping();
+        const body={messages,level:document.getElementById('levelSelect').value,customInstructions:document.getElementById('customInstructions').value,files:readyFiles.map(f=>({name:f.name,type:f.type}))};
+        if(examState.active){body.examMode={active:true,type:examState.type,specialty:examState.specialty,difficulty:examState.difficulty,questionCount:examState.questionCount}}
 
-        // Parse score data before displaying
+        const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+        if(!response.ok)throw new Error(`Erreur ${response.status}`);
+        const data=await response.json();removeTyping();
+
         const scoreData=parseScoreData(data.response);
         const cleanResponse=stripScoreData(data.response);
 
@@ -454,18 +545,16 @@
           saveScore(scoreData);
           if(scoreData.errors&&scoreData.errors.length>0)saveErrors(scoreData.errors,scoreData.specialty,scoreData.item);
           updateStats();
+          // End exam if we got a score back
+          if(examState.active)endExam();
         }
 
         messages.push({role:'assistant',content:cleanResponse});
         addMessageUI('assistant',cleanResponse);
-      }catch(error){
-        removeTyping();
-        addMessageUI('assistant',`**Erreur** : ${error.message}\n\nVérifie la clé API dans Vercel (ANTHROPIC_API_KEY).`);
-      }
+      }catch(error){removeTyping();addMessageUI('assistant',`**Erreur** : ${error.message}\n\nVérifie la clé API dans Vercel.`)}
       isLoading=false;document.getElementById('sendBtn').disabled=false;input.focus();
     }
 
-    // Init
     updateAvgScoreBar();
   </script>
 </body>
