@@ -214,6 +214,7 @@
         <option value="D2">D2 (DFASM1)</option>
         <option value="D3">D3 (DFASM2)</option>
         <option value="D4">D4 (DFASM3)</option>
+        <option value="D5" selected>D5 (5e année — EDN)</option>
       </select>
       <button class="icon-btn" onclick="toggleDashboard()" id="dashBtn" title="Ma progression">&#x1F4CA;</button>
       <button class="icon-btn" onclick="togglePanel()" id="panelBtn" title="Fiches et paramètres">
@@ -423,6 +424,7 @@
 
       // Clear chat for exam
       messages=[];
+      filesSentInSession=false;
       document.getElementById('chatContainer').innerHTML='';
 
       // Show timer
@@ -630,17 +632,72 @@
       updateAvgScoreBar();
     }
 
+    // Track si les fiches ont déjà été envoyées dans cette session
+    let filesSentInSession = false;
+
     async function sendMessage(){
       const input=document.getElementById('messageInput'),text=input.value.trim();
       if(!text||isLoading)return;
       isLoading=true;input.value='';input.style.height='auto';document.getElementById('sendBtn').disabled=true;
       const readyFiles=uploadedFiles.filter(f=>f.status==='ready');
       const userMsg={role:'user',content:text};
-      if(readyFiles.length>0)userMsg.files=readyFiles.map(f=>({name:f.name,type:f.type,mediaType:f.mediaType,data:f.data}));
+
+      // N'inclure les fichiers que si pas encore envoyés dans cette session
+      const shouldSendFiles = readyFiles.length > 0 && !filesSentInSession;
+      if(shouldSendFiles){
+        // Calculer la taille totale en base64 (~1.33x la taille originale)
+        // Vercel limite à 4.5 Mo la requête, on garde 1 Mo pour le reste
+        const MAX_FILES_SIZE = 3.5 * 1024 * 1024; // 3.5 Mo de données fichiers
+        let totalSize = 0;
+        const filesToSend = [];
+        for(const f of readyFiles){
+          const fSize = f.data ? f.data.length : 0;
+          if(totalSize + fSize <= MAX_FILES_SIZE){
+            filesToSend.push({name:f.name,type:f.type,mediaType:f.mediaType,data:f.data});
+            totalSize += fSize;
+          } else {
+            // Envoyer les fichiers texte qui prennent peu de place
+            if(f.type === 'text' && fSize < 50000){
+              filesToSend.push({name:f.name,type:f.type,mediaType:f.mediaType,data:f.data});
+            }
+          }
+        }
+        if(filesToSend.length < readyFiles.length){
+          addMessageUI('assistant', `**Note** : ${readyFiles.length - filesToSend.length} fiche(s) trop volumineuse(s) n'ont pas pu être envoyées. Privilégie les fichiers texte ou les PDFs légers (< 3 Mo au total). Les fiches images/PDF volumineux peuvent être découpés en plusieurs fichiers plus petits.`);
+        }
+        if(filesToSend.length > 0){
+          userMsg.files = filesToSend;
+          filesSentInSession = true;
+        }
+      }
       messages.push(userMsg);addMessageUI('user',text,readyFiles);questionCount++;updateStats();showTyping();
 
       try{
-        const body={messages,stream:true,level:document.getElementById('levelSelect').value,customInstructions:document.getElementById('customInstructions').value,files:readyFiles.map(f=>({name:f.name,type:f.type}))};
+        // Préparer les messages pour l'API : retirer les données binaires des anciens messages
+        const apiMessages = messages.map((msg,idx) => {
+          if(msg.files && idx < messages.length - 1){
+            // Ancien message : garder juste la mention des fichiers sans les données
+            const lightMsg = {role:msg.role, content:msg.content};
+            lightMsg.files = msg.files.map(f=>({name:f.name,type:f.type,mediaType:f.mediaType,data:f.data ? '<<ALREADY_SENT>>' : null}));
+            return lightMsg;
+          }
+          return msg;
+        });
+
+        // Filtrer : ne pas envoyer les données marquées <<ALREADY_SENT>> côté API
+        const cleanMessages = apiMessages.map(msg => {
+          if(msg.files){
+            const hasRealData = msg.files.some(f => f.data && f.data !== '<<ALREADY_SENT>>');
+            if(!hasRealData){
+              // Remplacer par un message texte mentionnant les fiches
+              const fileNames = msg.files.map(f=>f.name).join(', ');
+              return {role:msg.role, content: msg.content + `\n[Fiches déjà chargées : ${fileNames}]`};
+            }
+          }
+          return msg;
+        });
+
+        const body={messages:cleanMessages,stream:true,level:document.getElementById('levelSelect').value,customInstructions:document.getElementById('customInstructions').value,files:readyFiles.map(f=>({name:f.name,type:f.type}))};
         if(examState.active){body.examMode={active:true,type:examState.type,specialty:examState.specialty,difficulty:examState.difficulty,questionCount:examState.questionCount}}
 
         const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
