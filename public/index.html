@@ -306,9 +306,11 @@
           <div style="font-size:28px;margin-bottom:6px">&#x1F4C2;</div>
           <p>Clique ou glisse tes fiches ici</p>
           <div class="formats">PDF, images, texte — max 10 Mo/fichier</div>
+          <div class="formats" style="color:var(--accent);margin-top:4px">&#x2705; Les fiches sont sauvegardées entre les sessions</div>
         </div>
         <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.txt,.md" style="display:none" onchange="handleFiles(this.files)">
         <div class="file-list" id="fileList"></div>
+        <button class="clear-data-btn" style="margin-top:8px;display:none" id="clearFilesBtn" onclick="if(confirm('Supprimer toutes les fiches ?')){clearFilesDB();uploadedFiles=[];renderFileList();updateBadge();this.style.display='none'}">Supprimer toutes les fiches</button>
       </div>
       <div class="panel-section">
         <h3>Instructions personnalisées</h3>
@@ -518,13 +520,85 @@
     function togglePanel(){document.getElementById('sidePanel').classList.toggle('open');document.getElementById('panelOverlay').classList.toggle('open');document.getElementById('panelBtn').classList.toggle('active')}
     function saveInstructions(){localStorage.setItem('edn_instructions',document.getElementById('customInstructions').value);const f=document.getElementById('saveFeedback');f.style.opacity='1';setTimeout(()=>f.style.opacity='0',2000)}
 
+    // --- IndexedDB pour persistance des fiches ---
+    const DB_NAME='edn_files_db', DB_STORE='files', DB_VERSION=1;
+    function openFilesDB(){
+      return new Promise((resolve,reject)=>{
+        const req=indexedDB.open(DB_NAME,DB_VERSION);
+        req.onupgradeneeded=e=>{e.target.result.createObjectStore(DB_STORE,{keyPath:'name'})};
+        req.onsuccess=e=>resolve(e.target.result);
+        req.onerror=e=>reject(e.target.error);
+      });
+    }
+    async function saveFileToDB(file){
+      const db=await openFilesDB();
+      return new Promise((resolve,reject)=>{
+        const tx=db.transaction(DB_STORE,'readwrite');
+        tx.objectStore(DB_STORE).put({name:file.name,size:file.size,mediaType:file.mediaType,type:file.type,data:file.data,savedAt:Date.now()});
+        tx.oncomplete=()=>resolve();
+        tx.onerror=e=>reject(e.target.error);
+      });
+    }
+    async function removeFileFromDB(name){
+      const db=await openFilesDB();
+      return new Promise((resolve,reject)=>{
+        const tx=db.transaction(DB_STORE,'readwrite');
+        tx.objectStore(DB_STORE).delete(name);
+        tx.oncomplete=()=>resolve();
+        tx.onerror=e=>reject(e.target.error);
+      });
+    }
+    async function loadAllFilesFromDB(){
+      const db=await openFilesDB();
+      return new Promise((resolve,reject)=>{
+        const tx=db.transaction(DB_STORE,'readonly');
+        const req=tx.objectStore(DB_STORE).getAll();
+        req.onsuccess=()=>resolve(req.result||[]);
+        req.onerror=e=>reject(e.target.error);
+      });
+    }
+    async function clearFilesDB(){
+      const db=await openFilesDB();
+      return new Promise((resolve,reject)=>{
+        const tx=db.transaction(DB_STORE,'readwrite');
+        tx.objectStore(DB_STORE).clear();
+        tx.oncomplete=()=>resolve();
+        tx.onerror=e=>reject(e.target.error);
+      });
+    }
+
+    // Restaurer les fiches au démarrage
+    (async function restoreFiles(){
+      try{
+        const saved=await loadAllFilesFromDB();
+        if(saved.length>0){
+          saved.forEach(f=>{f.status='ready';uploadedFiles.push(f)});
+          renderFileList();updateBadge();
+          console.log(`${saved.length} fiche(s) restaurée(s)`);
+        }
+      }catch(e){console.log('Pas de fiches sauvegardées',e)}
+    })();
+
     // Files
     function handleFiles(fl){for(const f of fl){if(f.size>10485760){alert(`"${f.name}" > 10 Mo`);continue}readFile(f)}document.getElementById('fileInput').value='';document.getElementById('quickFileInput').value=''}
-    function readFile(file){const r=new FileReader(),e={name:file.name,size:file.size,mediaType:file.type,type:getFileType(file),data:null,status:'loading'};uploadedFiles.push(e);renderFileList();updateBadge();if(e.type==='text'){r.onload=ev=>{e.data=ev.target.result;e.status='ready';renderFileList()};r.readAsText(file)}else{r.onload=ev=>{e.data=ev.target.result.split(',')[1];e.status='ready';renderFileList()};r.readAsDataURL(file)}}
+    function readFile(file){
+      const r=new FileReader(),e={name:file.name,size:file.size,mediaType:file.type,type:getFileType(file),data:null,status:'loading'};
+      // Éviter les doublons
+      const existing=uploadedFiles.findIndex(f=>f.name===file.name);
+      if(existing>=0){uploadedFiles.splice(existing,1)}
+      uploadedFiles.push(e);renderFileList();updateBadge();
+      if(e.type==='text'){
+        r.onload=ev=>{e.data=ev.target.result;e.status='ready';renderFileList();saveFileToDB(e).catch(err=>console.log('Erreur sauvegarde:',err))};
+        r.readAsText(file);
+      }else{
+        r.onload=ev=>{e.data=ev.target.result.split(',')[1];e.status='ready';renderFileList();saveFileToDB(e).catch(err=>console.log('Erreur sauvegarde:',err))};
+        r.readAsDataURL(file);
+      }
+    }
     function getFileType(f){if(f.type==='application/pdf')return'pdf';if(f.type.startsWith('image/'))return'image';return'text'}
-    function removeFile(i){uploadedFiles.splice(i,1);renderFileList();updateBadge()}
+    function removeFile(i){const f=uploadedFiles.splice(i,1)[0];if(f)removeFileFromDB(f.name).catch(()=>{});renderFileList();updateBadge()}
     function formatSize(b){if(b<1024)return b+' o';if(b<1048576)return Math.round(b/1024)+' Ko';return(b/1048576).toFixed(1)+' Mo'}
-    function renderFileList(){document.getElementById('fileList').innerHTML=uploadedFiles.map((f,i)=>`<div class="file-item"><span>${f.type==='pdf'?'&#x1F4D5;':f.type==='image'?'&#x1F5BC;':'&#x1F4C4;'}</span><span class="file-name">${f.name}</span><span class="file-size">${formatSize(f.size)}</span><span class="file-status ${f.status}">${f.status==='ready'?'Prêt':'...'}</span><button class="file-remove" onclick="removeFile(${i})">&#x2715;</button></div>`).join('');updateStats()}
+    function renderFileList(){document.getElementById('fileList').innerHTML=uploadedFiles.map((f,i)=>`<div class="file-item"><span>${f.type==='pdf'?'&#x1F4D5;':f.type==='image'?'&#x1F5BC;':'&#x1F4C4;'}</span><span class="file-name">${f.name}</span><span class="file-size">${formatSize(f.size)}</span><span class="file-status ${f.status}">${f.status==='ready'?'Prêt':'...'}</span><button class="file-remove" onclick="removeFile(${i})">&#x2715;</button></div>`).join('');const cb=document.getElementById('clearFilesBtn');if(cb)cb.style.display=uploadedFiles.length>0?'inline-block':'none';updateStats()}
     function updateBadge(){const b=document.getElementById('filesBadge');b.style.display=uploadedFiles.length>0?'flex':'none';b.textContent=uploadedFiles.length}
     const zone=document.getElementById('uploadZone');
     zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('dragover')});
