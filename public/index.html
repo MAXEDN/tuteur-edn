@@ -650,46 +650,31 @@
       const userMsg={role:'user',content:text};
 
       // Stratégie d'envoi des fichiers :
-      // 1. Toujours envoyer la LISTE des noms de fiches disponibles (léger)
-      // 2. Envoyer le contenu des fichiers texte les plus pertinents (petits)
-      // 3. Envoyer quelques PDFs/images si la taille le permet
+      // Envoyer la LISTE COMPLÈTE des noms de fiches + contenu des fichiers TEXTE uniquement
+      // Les PDF/images sont trop lourds pour le body Vercel (4.5 Mo max)
       const shouldSendFiles = readyFiles.length > 0 && !filesSentInSession;
       if(shouldSendFiles){
-        const MAX_FILES_SIZE = 3 * 1024 * 1024; // 3 Mo max de contenu
-        let totalSize = 0;
         const filesToSend = [];
 
-        // Ajouter la liste de toutes les fiches disponibles comme contexte texte
-        const fileListText = readyFiles.map(f => f.name).join('\n');
-        filesToSend.push({
-          name: '_liste_fiches_disponibles.txt',
-          type: 'text',
-          content: `FICHES LiSA DISPONIBLES (${readyFiles.length} fiches) :\n${fileListText}\n\nL'étudiant a chargé ces fiches. Utilise leurs noms pour contextualiser tes QCM et dossiers progressifs. Quand l'étudiant demande un QCM sur un sujet, base-toi sur les fiches correspondantes.`
-        });
+        // Construire la liste complète avec les noms de toutes les fiches
+        const fileListText = readyFiles.map(f => `- ${f.name} (${f.type}, ${Math.round((f.size||0)/1024)} Ko)`).join('\n');
 
-        // Trier : texte d'abord (léger), puis PDF petits, puis images
-        const sorted = [...readyFiles].sort((a,b) => {
-          if(a.type === 'text' && b.type !== 'text') return -1;
-          if(a.type !== 'text' && b.type === 'text') return 1;
-          return (a.size||0) - (b.size||0);
-        });
-
-        for(const f of sorted){
-          const fSize = f.data ? f.data.length : (f.content ? f.content.length : 0);
-          if(totalSize + fSize <= MAX_FILES_SIZE){
-            if(f.content){
-              filesToSend.push({name:f.name,type:f.type,content:f.content});
-            } else if(f.data){
-              filesToSend.push({name:f.name,type:f.type,mediaType:f.mediaType,data:f.data});
-            }
-            totalSize += fSize;
+        // Ajouter le contenu des fichiers texte (légers)
+        const textFiles = readyFiles.filter(f => f.type === 'text' && f.content);
+        let textContent = '';
+        for(const f of textFiles){
+          if(textContent.length + (f.content||'').length < 500000){ // max ~500Ko de texte
+            textContent += `\n\n=== ${f.name} ===\n${f.content}`;
           }
         }
 
-        const sentCount = filesToSend.length - 1; // -1 pour la liste
-        if(sentCount < readyFiles.length){
-          addMessageUI('assistant', `**${readyFiles.length} fiches disponibles** — ${sentCount} envoyée${sentCount>1?'s':''} au tuteur (limite de taille). Le tuteur connaît la liste complète de tes fiches et peut faire des QCM sur n'importe quel sujet.`);
-        }
+        filesToSend.push({
+          name: '_contexte_fiches.txt',
+          type: 'text',
+          content: `FICHES LiSA DISPONIBLES (${readyFiles.length} fiches) :\n${fileListText}\n\nL'étudiant a chargé ces ${readyFiles.length} fiches depuis Google Drive. Utilise les NOMS des fiches pour identifier les sujets disponibles et construire des QCM/DP pertinents basés sur le programme de Max. Tu connais le contenu des référentiels LiSA correspondants grâce à tes connaissances.${textContent ? '\n\nCONTENU DES FICHES TEXTE :' + textContent : ''}`
+        });
+
+        addMessageUI('assistant', `**${readyFiles.length} fiches LiSA chargées.** Le tuteur connaît la liste complète et peut faire des QCM sur n'importe quel sujet couvert par tes fiches.`);
         userMsg.files = filesToSend;
         filesSentInSession = true;
       }
