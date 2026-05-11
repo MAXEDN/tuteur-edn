@@ -330,12 +330,21 @@ Ne jamais construire un DP sur un item sans avoir exploité la fiche corresponda
 
         for (const file of msg.files) {
           if (file.type === "image") {
+            // Retirer le préfixe data URI si présent
+            let imgData = file.data || '';
+            let imgMediaType = file.mediaType || 'image/jpeg';
+            if (imgData.startsWith('data:')) {
+              const parts = imgData.split(',');
+              const header = parts[0] || '';
+              imgMediaType = header.match(/data:(.*?);/)?.[1] || imgMediaType;
+              imgData = parts[1] || imgData;
+            }
             content.push({
               type: "image",
               source: {
                 type: "base64",
-                media_type: file.mediaType,
-                data: file.data,
+                media_type: imgMediaType,
+                data: imgData,
               },
             });
             content.push({
@@ -343,12 +352,17 @@ Ne jamais construire un DP sur un item sans avoir exploité la fiche corresponda
               text: `[Fiche jointe : ${file.name}]`,
             });
           } else if (file.type === "pdf") {
+            // Retirer le préfixe data URI si présent
+            let pdfData = file.data || '';
+            if (pdfData.startsWith('data:')) {
+              pdfData = pdfData.split(',')[1] || pdfData;
+            }
             content.push({
               type: "document",
               source: {
                 type: "base64",
                 media_type: "application/pdf",
-                data: file.data,
+                data: pdfData,
               },
             });
             content.push({
@@ -356,9 +370,10 @@ Ne jamais construire un DP sur un item sans avoir exploité la fiche corresponda
               text: `[Document PDF joint : ${file.name}]`,
             });
           } else {
+            const textContent = file.content || file.data || '';
             content.push({
               type: "text",
-              text: `[Contenu de la fiche "${file.name}" :]\n${file.data}`,
+              text: `[Contenu de la fiche "${file.name}" :]\n${textContent}`,
             });
           }
         }

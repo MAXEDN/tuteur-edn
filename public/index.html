@@ -649,33 +649,49 @@
       const readyFiles=uploadedFiles.filter(f=>f.status==='ready');
       const userMsg={role:'user',content:text};
 
-      // N'inclure les fichiers que si pas encore envoyés dans cette session
+      // Stratégie d'envoi des fichiers :
+      // 1. Toujours envoyer la LISTE des noms de fiches disponibles (léger)
+      // 2. Envoyer le contenu des fichiers texte les plus pertinents (petits)
+      // 3. Envoyer quelques PDFs/images si la taille le permet
       const shouldSendFiles = readyFiles.length > 0 && !filesSentInSession;
       if(shouldSendFiles){
-        // Calculer la taille totale en base64 (~1.33x la taille originale)
-        // Vercel limite à 4.5 Mo la requête, on garde 1 Mo pour le reste
-        const MAX_FILES_SIZE = 3.5 * 1024 * 1024; // 3.5 Mo de données fichiers
+        const MAX_FILES_SIZE = 3 * 1024 * 1024; // 3 Mo max de contenu
         let totalSize = 0;
         const filesToSend = [];
-        for(const f of readyFiles){
-          const fSize = f.data ? f.data.length : 0;
+
+        // Ajouter la liste de toutes les fiches disponibles comme contexte texte
+        const fileListText = readyFiles.map(f => f.name).join('\n');
+        filesToSend.push({
+          name: '_liste_fiches_disponibles.txt',
+          type: 'text',
+          content: `FICHES LiSA DISPONIBLES (${readyFiles.length} fiches) :\n${fileListText}\n\nL'étudiant a chargé ces fiches. Utilise leurs noms pour contextualiser tes QCM et dossiers progressifs. Quand l'étudiant demande un QCM sur un sujet, base-toi sur les fiches correspondantes.`
+        });
+
+        // Trier : texte d'abord (léger), puis PDF petits, puis images
+        const sorted = [...readyFiles].sort((a,b) => {
+          if(a.type === 'text' && b.type !== 'text') return -1;
+          if(a.type !== 'text' && b.type === 'text') return 1;
+          return (a.size||0) - (b.size||0);
+        });
+
+        for(const f of sorted){
+          const fSize = f.data ? f.data.length : (f.content ? f.content.length : 0);
           if(totalSize + fSize <= MAX_FILES_SIZE){
-            filesToSend.push({name:f.name,type:f.type,mediaType:f.mediaType,data:f.data});
-            totalSize += fSize;
-          } else {
-            // Envoyer les fichiers texte qui prennent peu de place
-            if(f.type === 'text' && fSize < 50000){
+            if(f.content){
+              filesToSend.push({name:f.name,type:f.type,content:f.content});
+            } else if(f.data){
               filesToSend.push({name:f.name,type:f.type,mediaType:f.mediaType,data:f.data});
             }
+            totalSize += fSize;
           }
         }
-        if(filesToSend.length < readyFiles.length){
-          addMessageUI('assistant', `**Note** : ${readyFiles.length - filesToSend.length} fiche(s) trop volumineuse(s) n'ont pas pu être envoyées. Privilégie les fichiers texte ou les PDFs légers (< 3 Mo au total). Les fiches images/PDF volumineux peuvent être découpés en plusieurs fichiers plus petits.`);
+
+        const sentCount = filesToSend.length - 1; // -1 pour la liste
+        if(sentCount < readyFiles.length){
+          addMessageUI('assistant', `**${readyFiles.length} fiches disponibles** — ${sentCount} envoyée${sentCount>1?'s':''} au tuteur (limite de taille). Le tuteur connaît la liste complète de tes fiches et peut faire des QCM sur n'importe quel sujet.`);
         }
-        if(filesToSend.length > 0){
-          userMsg.files = filesToSend;
-          filesSentInSession = true;
-        }
+        userMsg.files = filesToSend;
+        filesSentInSession = true;
       }
       messages.push(userMsg);addMessageUI('user',text,readyFiles);questionCount++;updateStats();showTyping();
 
@@ -1302,7 +1318,8 @@
         name: mimeType.startsWith('application/vnd.google-apps') ? name + '.pdf' : name,
         type: type,
         size: bytes.length,
-        source: 'gdrive'
+        source: 'gdrive',
+        status: 'ready'
       };
 
       if (type === 'text') {
