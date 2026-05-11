@@ -695,7 +695,9 @@
         // Filtrer : ne pas envoyer les données marquées <<ALREADY_SENT>> côté API
         const cleanMessages = apiMessages.map(msg => {
           if(msg.files){
-            const hasRealData = msg.files.some(f => f.data && f.data !== '<<ALREADY_SENT>>');
+            const hasRealData = msg.files.some(f =>
+              (f.data && f.data !== '<<ALREADY_SENT>>') || f.content
+            );
             if(!hasRealData){
               // Remplacer par un message texte mentionnant les fiches
               const fileNames = msg.files.map(f=>f.name).join(', ');
@@ -708,8 +710,14 @@
         const body={messages:cleanMessages,stream:true,level:document.getElementById('levelSelect').value,customInstructions:document.getElementById('customInstructions').value,files:readyFiles.map(f=>({name:f.name,type:f.type}))};
         if(examState.active){body.examMode={active:true,type:examState.type,specialty:examState.specialty,difficulty:examState.difficulty,questionCount:examState.questionCount}}
 
-        const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-        if(!response.ok)throw new Error(`Erreur ${response.status}`);
+        const bodyStr = JSON.stringify(body);
+        console.log('Request body size:', Math.round(bodyStr.length/1024), 'Ko');
+        const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:bodyStr});
+        if(!response.ok){
+          let errMsg = `Erreur ${response.status}`;
+          try { const errData = await response.json(); errMsg += ': ' + (errData.error || ''); } catch(e){}
+          throw new Error(errMsg);
+        }
 
         removeTyping();
 
@@ -769,7 +777,7 @@
         }
 
         messages.push({role:'assistant',content:cleanResponse});
-      }catch(error){removeTyping();addMessageUI('assistant',`**Erreur** : ${error.message}\n\nVérifie la clé API dans Vercel.`)}
+      }catch(error){removeTyping();console.error('Chat error:',error);addMessageUI('assistant',`**Erreur** : ${error.message}`)}
       isLoading=false;document.getElementById('sendBtn').disabled=false;input.focus();
     }
 
